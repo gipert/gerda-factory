@@ -1,0 +1,6 @@
+bin
+
+# junk
+.DS_Store
+*.swp
+*.swo
