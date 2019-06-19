@@ -1,38 +1,37 @@
-/* GerdaFactory.h
+/* GerdaFastFactory.h
  *
  * Author: Luigi Pertoldi
  * Created: Tue 18 Jun 2019
  *
  */
-#include <vector>
-#include <map>
+#include "vector"
 
 #include "TH1.h"
 #include "TRandom3.h"
 
-#ifndef _GERDA_FACTORY_H
-#define _GERDA_FACTORY_H
+#ifndef _GERDA_FAST_FACTORY_H
+#define _GERDA_FAST_FACTORY_H
 
-class GerdaFactory {
+class GerdaFastFactory {
 
     public:
 
     // delete dangerous constructors
-    GerdaFactory           (GerdaFactory const&) = delete;
-    GerdaFactory& operator=(GerdaFactory const&) = delete;
+    GerdaFastFactory           (GerdaFastFactory const&) = delete;
+    GerdaFastFactory& operator=(GerdaFastFactory const&) = delete;
 
     // custom constructor
-    GerdaFactory();
-    ~GerdaFactory();
+    GerdaFastFactory();
+    ~GerdaFastFactory();
 
     void SetCountsRange(float xmin, float xmax);
     void AddComponent(const TH1* hist, const float counts);
-    void FillPseudoExp(TH1* experiment);
+    TH1* GetPseudoExp();
 
     private:
 
     TRandom3 _rndgen;
-    std::map<TH1*, float> _comp_list;
+    TH1* _model;
     std::pair<float, float> _range;
 };
 

@@ -17,7 +17,7 @@
 
 namespace utils {
 
-    TH1* GetFitComponent(std::string filename, std::string objectname, TH1* data) {
+    TH1* get_component(std::string filename, std::string objectname, TH1* data) {
         TFile _tf(filename.c_str());
         if (!_tf.IsOpen()) throw std::runtime_error("invalid ROOT file: " + filename);
         auto obj = _tf.Get(objectname.c_str());
@@ -54,13 +54,26 @@ namespace utils {
         }
     }
 
-    class logging {
+    std::pair<std::string, std::string> get_file_obj(std::string expr) {
+        std::string filename;
+        std::string objname = "";
+        if (expr.find(':') != std::string::npos) {
+            filename = expr.substr(0, expr.find_first_of(':'));
+            objname = expr.substr(expr.find_first_of(':')+1, std::string::npos);
+        }
+        else filename = expr;
+
+        return std::pair<std::string, std::string>(filename, objname);
+    }
+
+    namespace logging {
 
         enum level {debug, info, warning, error};
+        std::ofstream devnull("/dev/null");
 
-        static std::ostream& msg(level lvl) {
+        std::ostream& msg(const level& lvl) {
 
-            static logging instance(info);
+            level min_level = info;
 
             if (lvl == debug and min_level <= debug) {
                 std::cout << "\033[36m[ Debug:\033[0m ";
@@ -78,24 +91,9 @@ namespace utils {
                 std::cerr << "\033[91m[ Error:\033[0m ";
                 return std::cerr;
             }
-            else {
-                return devnull;
-            }
-        };
-
-        static void set_min_level(level lvl) { min_level = lvl; };
-
-        private:
-        logging(level lvl) : min_level(lvl) {}
-
-        level min_level;
-        const std::ofstream devnull("/dev/null");
-
-        public:
-        logging()                      = delete;
-        logging(logging const&)        = delete;
-        void operator=(logging const&) = delete;
-    };
+            else return devnull;
+        }
+    }
 }
 
 #endif

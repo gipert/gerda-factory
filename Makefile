@@ -12,8 +12,8 @@ all: bin/gerda-fake-gen
 dirs :
 	mkdir -p bin
 
-bin/gerda-fake-gen : src/gerda-fake-gen.cc src/GerdaFactory.cc src/GerdaFactory.h src/utils.hpp dirs
-	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBS)
+bin/gerda-fake-gen : src/gerda-fake-gen.cc src/GerdaFastFactory.cc src/GerdaFastFactory.h src/utils.hpp dirs
+	$(CXX) $(CXXFLAGS) -o $@ $< src/GerdaFastFactory.cc $(LIBS)
 
 clean :
 	-rm -r bin

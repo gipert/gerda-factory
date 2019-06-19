@@ -8,10 +8,19 @@
 #include <getopt.h>
 
 #include "utils.hpp"
+namespace log = utils::logging;
+
 #include "GerdaFactory.h"
 
 #include "json.hpp"
 using json = nlohmann::json;
+
+NLOHMANN_JSON_SERIALIZE_ENUM(utils::logging::level, {
+    {utils::logging::debug,   "debug"},
+    {utils::logging::info,    "info"},
+    {utils::logging::warning, "warning"},
+    {utils::logging::error,   "error"}
+})
 
 int main(int argc, char** argv) {
 
@@ -52,11 +61,27 @@ int main(int argc, char** argv) {
 
     std::ifstream fconfig(args[0]);
     if (!fconfig.is_open()) {
-        // BCLog::OutError("config file " + args[0] + " does not exist");
+        log::msg(log::error) << "config file " << args[0] << " does not exist";
         return 1;
     }
     json config;
     fconfig >> config;
+
+    /*
+     * create model
+     */
+
+    GerdaFactory factory();
+
+    for (auto& it : config["components"]) {
+        // it's a user defined file
+        if (it.contains("root-file")) {
+            auto obj_name = it["hist-name"].get<std::string>();
+            auto th = utils::get_component(it["root-file"].get<std::string>(), obj_name, ...);
+        }
+        else { // look into gerda-pdfs database
+        }
+    }
 
     return 0;
 }
