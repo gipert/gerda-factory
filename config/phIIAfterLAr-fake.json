@@ -1,6 +1,6 @@
 {
-    "logging" : "summary",
-    "output-file" : "phIIAfterLAr-fake.root:M1_enrBEGe",
+    "logging" : "info",
+    "output-file" : "../results/phIIAfterLAr-fake.root:M1_enrBEGe",
     "range-for-counts" : [565, 2000],
     "gerda-pdfs" : "../data/gerda-pdfs/v2.0-RC",
     "hist-name" : "M1_enrBEGe",

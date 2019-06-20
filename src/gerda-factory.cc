@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
                         + volume + "-" + part + "-" + i + ".root";
                     logs::out(logs::debug) << "opening file " << filename << std::endl;
                     logs::out(logs::debug) << "summing object '" << hist_name << " with weight "
-                                            << p.value().get<double>()/sumw << std::endl;
+                                           << p.value().get<double>()/sumw << std::endl;
                     // get histogram
                     auto thh = utils::get_component(filename, hist_name, 8000, 0, 8000);
                     // add it with weight

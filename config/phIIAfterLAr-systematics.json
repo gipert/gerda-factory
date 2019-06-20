@@ -1,11 +1,11 @@
 {
-    "logging" : "summary",
-    "output-dir" : "output",
-    "dataset" : "M1_enrBEGe",
+    "logging" : "debug",
+    "output-file" : "../results/phIIAfterLAr-exp-pool.root",
     "range-for-counts" : [565, 2000],
+    "hist-name" : "M1_enrBEGe",
     "components" : [
         {
-            "root-file" : "alphas/analytic/pdf-functions.root",
+            "root-file" : "${gerda-pdfs}/alphas/analytic/pdf-functions.root",
             "components" : {
                 "alpha-slope" : {
                     "hist-name" : "ramp",
@@ -13,7 +13,7 @@
                 },
                 "alpha-offset" : {
                     "hist-name" : "flat",
-                    "amount-cts" : 0
+                    "amount-cts" : 28
                 }
             }
         },
@@ -22,15 +22,15 @@
             "components" : {
                 "Bi212-Tl208" : {
                     "isotope" : { "Tl208-larveto" : 0.3539, "Bi212-larveto" : 1 },
-                    "amount-cts" : 0
+                    "amount-cts" : 36
                 },
                 "Pb214-Bi214" : {
                     "isotope" : { "Bi214-larveto" : 1, "Pb214-larveto" : 1 },
-                    "amount-cts" : 0
+                    "amount-cts" : 79
                 },
                 "Co60" : {
                     "isotope": "Co60-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 25
                 }
             }
         },
@@ -39,7 +39,7 @@
             "components" : {
                 "2nbb" : {
                     "isotope" : "2nbb-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 45635
                 }
             }
         },
@@ -48,7 +48,7 @@
             "components" : {
                 "Ac228" : {
                     "isotope" : "Ac228-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 113
                 }
             }
         },
@@ -57,7 +57,7 @@
             "components" : {
                 "K40-close" : {
                     "isotope" : "K40-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 1583
                 }
             }
         },
@@ -66,7 +66,7 @@
             "components" : {
                 "K40-far" : {
                     "isotope" : "K40-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 953
                 }
             }
         },
@@ -75,7 +75,7 @@
             "components" : {
                 "K42-far" : {
                     "isotope" : "K42-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 1313
                 }
             }
         },
@@ -84,29 +84,33 @@
             "components" : {
                 "K42-close" : {
                     "isotope" : "K42-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 316
                 }
             }
         }
     ],
     "pdf-versions" : {
-        "all" : {
-            "transition-layer" : [ "v2.0-RC", "v2.0-RC-2nufit-bjorn", "v2.0-RC-2nufit-zerodl" ],
-            "LAr-model" : [ "v2.0-RC" ]
+        "gerda-pdfs" : {
+            "transition-layer" : [
+                "../data/gerda-pdfs/v2.0-RC",
+                "../data/gerda-pdfs/v2.0-RC-2nufit-bjorn",
+                "../data/gerda-pdfs/v2.0-RC-2nufit-zerodl"
+            ],
+            "LAr-model" : [ "../data/gerda-pdfs/v2.0-RC" ]
         },
-        "2nbb"      : [ "data/2nbb-kotilia-iachello.root" ],
-        "Ac228"     : [ "larveto/fibers/Ac228/pdf-larveto-fibers-Ac228-larveto.root" ],
-        "K40-far"   : [ "larveto/coppert_shroud/K40/pdf-larveto-copper_shroud-K40-larveto.root" ],
-        "K42-close" : [ "gedet/pplus_bege/K42/pdf-gedet-pplus_bege-K42-larveto.root" ],
-        "K42-far"   : [ "lar/above_array/K42/pdf-lar-above_array-K42-larveto.root" ],
+        "2nbb"      : [ "../data/2nbb-kotilia-iachello.root" ],
+        "Ac228"     : [ "${gerda-pdfs}/larveto/fibers/Ac228/pdf-larveto-fibers-Ac228-larveto.root" ],
+        "K40-far"   : [ "${gerda-pdfs}/larveto/coppert_shroud/K40/pdf-larveto-copper_shroud-K40-larveto.root" ],
+        "K42-close" : [ "${gerda-pdfs}/gedet/pplus_bege/K42/pdf-gedet-pplus_bege-K42-larveto.root" ],
+        "K42-far"   : [ "${gerda-pdfs}/lar/above_array/K42/pdf-lar-above_array-K42-larveto.root" ],
         "K40-close" : [
-            "cables/cables_all/K40/pdf-cables-cables_all-K40-larveto.root",
-            "ge_holders/plates/K40/pdf-ge_holders-plates-K40-larveto.root"
+            "${gerda-pdfs}/cables/cables_all/K40/pdf-cables-cables_all-K40-larveto.root",
+            "${gerda-pdfs}/ge_holders/plates/K40/pdf-ge_holders-plates-K40-larveto.root"
         ],
         "Bi212-Tl208" : [
             {
-                "larveto/fibers/Bi212/pdf-larveto-fibers-Bi212-larveto.root" : 1,
-                "larveto/fibers/Tl208/pdf-larveto-fibers-Tl208-larveto.root" : 0.3539
+                "${gerda-pdfs}/larveto/fibers/Bi212/pdf-larveto-fibers-Bi212-larveto.root" : 1,
+                "${gerda-pdfs}/larveto/fibers/Tl208/pdf-larveto-fibers-Tl208-larveto.root" : 0.3539
             }
         ]
     }
