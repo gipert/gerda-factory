@@ -28,6 +28,7 @@ class GerdaFactory {
     void SetCountsRange(float xmin, float xmax);
     void AddComponent(const TH1* hist, const float counts);
     void FillPseudoExp(TH1* experiment);
+    void FillPseudoExp(TH1& experiment);
 
     private:
 

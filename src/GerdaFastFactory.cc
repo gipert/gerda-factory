@@ -12,15 +12,19 @@ GerdaFastFactory::GerdaFastFactory() :
     _range(0, 0) {
 }
 
+GerdaFastFactory::~GerdaFastFactory() {
+    delete _model;
+}
+
 void GerdaFastFactory::SetCountsRange(float xmin, float xmax) {
-    if (xmin == xmax != 0 || xmax < xmin) throw std::runtime_error("GerdaFastFactory::SetCountsRange] invalid range.");
+    if (!(xmin == 0 and xmax == 0) || xmax < xmin) throw std::runtime_error("GerdaFastFactory::SetCountsRange] invalid range.");
     _range.first = xmin;
     _range.second = xmax;
 }
 
 void GerdaFastFactory::AddComponent(const TH1* hist, const float counts) {
     if (!hist) throw std::runtime_error("GerdaFastFactory::AddComponent] invalid pointer detected.");
-    if (counts <= 0) throw std::runtime_error("GerdaFastFactory::AddComponent] weight is <= 0.");
+    if (counts < 0) throw std::runtime_error("GerdaFastFactory::AddComponent] weight is < 0.");
 
     // clone
     auto htmp = dynamic_cast<TH1*>(

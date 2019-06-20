@@ -2,9 +2,11 @@
     "logging" : "summary",
     "output-file" : "phIIAfterLAr-fake.root:M1_enrBEGe",
     "range-for-counts" : [565, 2000],
+    "gerda-pdfs" : "../data/gerda-pdfs/v2.0-RC",
+    "hist-name" : "M1_enrBEGe",
     "components" : [
         {
-            "root-file" : "alphas/analytic/pdf-functions.root",
+            "root-file" : "../data/gerda-pdfs/v2.0-RC/alphas/analytic/pdf-functions.root",
             "components" : {
                 "alpha-slope" : {
                     "hist-name" : "ramp",
@@ -12,7 +14,7 @@
                 },
                 "alpha-offset" : {
                     "hist-name" : "flat",
-                    "amount-cts" : 0
+                    "amount-cts" : 28
                 }
             }
         },
@@ -21,15 +23,15 @@
             "components" : {
                 "Bi212-Tl208" : {
                     "isotope" : { "Tl208-larveto" : 0.3539, "Bi212-larveto" : 1 },
-                    "amount-cts" : 0
+                    "amount-cts" : 36
                 },
                 "Pb214-Bi214" : {
                     "isotope" : { "Bi214-larveto" : 1, "Pb214-larveto" : 1 },
-                    "amount-cts" : 0
+                    "amount-cts" : 79
                 },
                 "Co60" : {
                     "isotope": "Co60-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 25
                 }
             }
         },
@@ -38,7 +40,7 @@
             "components" : {
                 "2nbb" : {
                     "isotope" : "2nbb-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 45635
                 }
             }
         },
@@ -47,7 +49,7 @@
             "components" : {
                 "Ac228" : {
                     "isotope" : "Ac228-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 113
                 }
             }
         },
@@ -56,7 +58,7 @@
             "components" : {
                 "K40-close" : {
                     "isotope" : "K40-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 1583
                 }
             }
         },
@@ -65,7 +67,7 @@
             "components" : {
                 "K40-far" : {
                     "isotope" : "K40-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 953
                 }
             }
         },
@@ -74,7 +76,7 @@
             "components" : {
                 "K42-far" : {
                     "isotope" : "K42-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 1313
                 }
             }
         },
@@ -83,7 +85,7 @@
             "components" : {
                 "K42-close" : {
                     "isotope" : "K42-larveto",
-                    "amount-cts" : 0
+                    "amount-cts" : 316
                 }
             }
         }

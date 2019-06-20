@@ -17,7 +17,7 @@
 
 namespace utils {
 
-    TH1* get_component(std::string filename, std::string objectname, TH1* data) {
+    TH1* get_component(std::string filename, std::string objectname, int nbinsx = 100, double xmin = 0, double xmax = 100) {
         TFile _tf(filename.c_str());
         if (!_tf.IsOpen()) throw std::runtime_error("invalid ROOT file: " + filename);
         auto obj = _tf.Get(objectname.c_str());
@@ -41,8 +41,7 @@ namespace utils {
             return _th;
         }
         else if (obj->InheritsFrom(TF1::Class())) {
-            auto _th = new TH1D(obj->GetName(), obj->GetTitle(), data->GetNbinsX(),
-                data->GetXaxis()->GetXmin(), data->GetXaxis()->GetXmax());
+            auto _th = new TH1D(obj->GetName(), obj->GetTitle(), nbinsx, xmin, xmax);
             for (int b = 1; b < _th->GetNbinsX(); ++b) {
                 _th->SetBinContent(b, dynamic_cast<TF1*>(obj)->Eval(_th->GetBinCenter(b)));
             }
@@ -73,7 +72,7 @@ namespace utils {
 
         std::ostream& msg(const level& lvl) {
 
-            level min_level = info;
+            level min_level = debug;
 
             if (lvl == debug and min_level <= debug) {
                 std::cout << "\033[36m[ Debug:\033[0m ";
