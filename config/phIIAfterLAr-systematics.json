@@ -2,10 +2,11 @@
     "logging" : "debug",
     "output-file" : "../results/phIIAfterLAr-exp-pool.root",
     "range-for-counts" : [565, 2000],
+    "gerda-pdfs" : "../data/gerda-pdfs/v2.0-RC",
     "hist-name" : "M1_enrBEGe",
     "components" : [
         {
-            "root-file" : "${gerda-pdfs}/alphas/analytic/pdf-functions.root",
+            "root-file" : "../data/gerda-pdfs/v2.0-RC/alphas/analytic/pdf-functions.root",
             "components" : {
                 "alpha-slope" : {
                     "hist-name" : "ramp",
@@ -89,28 +90,27 @@
             }
         }
     ],
-    "pdf-versions" : {
-        "gerda-pdfs" : {
+    "pdf-distorsions" : {
+        "prefix" : "../data/distorsions",
+        "global" : {
             "transition-layer" : [
-                "../data/gerda-pdfs/v2.0-RC",
-                "../data/gerda-pdfs/v2.0-RC-2nufit-bjorn",
-                "../data/gerda-pdfs/v2.0-RC-2nufit-zerodl"
-            ],
-            "LAr-model" : [ "../data/gerda-pdfs/v2.0-RC" ]
+                "v2.0-RC-2nufit-bjorn",
+                "v2.0-RC-2nufit-zerodl"
+            ]
         },
-        "2nbb"      : [ "../data/2nbb-kotilia-iachello.root" ],
-        "Ac228"     : [ "${gerda-pdfs}/larveto/fibers/Ac228/pdf-larveto-fibers-Ac228-larveto.root" ],
-        "K40-far"   : [ "${gerda-pdfs}/larveto/coppert_shroud/K40/pdf-larveto-copper_shroud-K40-larveto.root" ],
-        "K42-close" : [ "${gerda-pdfs}/gedet/pplus_bege/K42/pdf-gedet-pplus_bege-K42-larveto.root" ],
-        "K42-far"   : [ "${gerda-pdfs}/lar/above_array/K42/pdf-lar-above_array-K42-larveto.root" ],
+        "2nbb"      : [ "2nbb-kotilia-iachello.root" ],
+        "Ac228"     : [ "pdf-larveto-fibers-Ac228-larveto.root" ],
+        "K40-far"   : [ "pdf-larveto-copper_shroud-K40-larveto.root" ],
+        "K42-close" : [ "pdf-gedet-pplus_bege-K42-larveto.root" ],
+        "K42-far"   : [ "pdf-lar-above_array-K42-larveto.root" ],
         "K40-close" : [
-            "${gerda-pdfs}/cables/cables_all/K40/pdf-cables-cables_all-K40-larveto.root",
-            "${gerda-pdfs}/ge_holders/plates/K40/pdf-ge_holders-plates-K40-larveto.root"
+            "pdf-cables-cables_all-K40-larveto.root",
+            "pdf-ge_holders-plates-K40-larveto.root"
         ],
         "Bi212-Tl208" : [
             {
-                "${gerda-pdfs}/larveto/fibers/Bi212/pdf-larveto-fibers-Bi212-larveto.root" : 1,
-                "${gerda-pdfs}/larveto/fibers/Tl208/pdf-larveto-fibers-Tl208-larveto.root" : 0.3539
+                "pdf-larveto-fibers-Bi212-larveto.root" : 1,
+                "pdf-larveto-fibers-Tl208-larveto.root" : 0.3539
             }
         ]
     }
