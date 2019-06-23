@@ -5,8 +5,10 @@
  *
  */
 #include <iostream>
+#include <algorithm>
 #include <getopt.h>
 
+#include "TRandom3.h"
 #include "utils.hpp"
 namespace logs = utils::logging;
 
@@ -23,6 +25,22 @@ namespace utils { namespace logging {
             {utils::logging::error,   "error"},
             })
 }}
+
+struct bkg_comp {
+    std::string name;
+    TH1* hist;
+    float counts;
+
+    ~bkg_comp() { delete hist; }
+    bkg_comp(std::string n, TH1* h, float c) :
+        name(n), hist(h), counts(c) {}
+    bkg_comp(bkg_comp const& orig) :
+        name(orig.name),
+        hist(dynamic_cast<TH1*>(orig.hist->Clone())),
+        counts(orig.counts) {}
+};
+
+std::vector<bkg_comp> get_components_json(json config, std::string gerda_pdfs = "");
 
 int main(int argc, char** argv) {
 
@@ -77,15 +95,101 @@ int main(int argc, char** argv) {
 
     GerdaFactory factory;
 
+    // set range for counts
+    if (config["range-for-counts"].is_array()) {
+        factory.SetCountsRange(
+            config["range-for-counts"][1].get<float>(),
+            config["range-for-counts"][2].get<float>()
+        );
+    }
+
+    logs::out(logs::debug) << "getting base component list from json config" << std::endl;
+    auto comp_list = get_components_json(config);
+    auto comp_list_save = comp_list;
+
+    auto dist_prefix = config["pdf-distortions"].value("prefix", ".") + "/";
+
+    // distortions given with gerda-pdfs structure
+    TRandom3 rndgen(0);
+    logs::out(logs::debug) << "applying 'global' distortions" << std::endl;
+    for (auto& it : config["pdf-distortions"]["global"].items()) {
+        logs::out(logs::debug) << "choosing a distortion from '" << it.key() << "'" << std::endl;
+        // choose a distortion randomly
+        auto choice = rndgen.Integer(it.value().size());
+        // get histograms
+        auto dist_list = get_components_json(config, dist_prefix + it.value()[choice].get<std::string>());
+        for (auto& d : dist_list) {
+            // see if we have a corresponding fit component
+            auto result = std::find_if(
+                comp_list.begin(), comp_list.end(),
+                [&d](bkg_comp& a) { return a.name == d.name; }
+            );
+
+            // distort
+            if (result != comp_list.end()) {
+                logs::out(logs::debug) << "found distortion for fit component '" << d.name
+                                       << "', applying" << std::endl;
+                result->hist->Multiply(d.hist);
+            }
+        }
+    }
+    // distortions for single components
+    logs::out(logs::debug) << "applying 'specific' distortions" << std::endl;
+    for (auto& it : config["pdf-distortions"]["specific"].items()) {
+        // see if we have a corresponding fit component
+        auto result = std::find_if(
+            comp_list.begin(), comp_list.end(),
+            [&it](bkg_comp& a) { return a.name == it.key(); }
+        );
+
+        if (result != comp_list.end()) {
+            logs::out(logs::debug) << "found distortion for fit component '" << it.key()
+                                   << "', applying" << std::endl;
+            // choose a distortion randomly
+            auto choice = rndgen.Integer(it.value().size());
+            auto hdist = utils::get_component(
+                dist_prefix + it.value()[choice].get<std::string>(),
+                config["hist-name"].get<std::string>(),
+                8000, 0, 8000
+            );
+            result->hist->Multiply(hdist);
+        }
+        else {
+            logs::out(logs::warning) << "could not find component '" << it.key()
+                                     << "' to distort" << std::endl;
+        }
+    }
+
+    // add components to the factory
+    for (auto& e : comp_list) factory.AddComponent(e.hist, e.counts);
+
+    logs::out(logs::debug) << "opening output file" << std::endl;
+    auto outname = utils::get_file_obj(config["output-file"].get<std::string>());
+    TFile fout(outname.first.c_str(), "recreate");
+
+    // now generate the experiment
+    logs::out(logs::debug) << "filling output histogram" << std::endl;
+    TH1D hexp(outname.second.c_str(), "Pseudo experiment", 8000, 0, 8000);
+    factory.FillPseudoExp(hexp);
+
+    hexp.Write();
+
+    logs::out(logs::info) << "object " << outname.second
+                          << " written on file " << outname.first << std::endl;
+
+    return 0;
+}
+
+std::vector<bkg_comp> get_components_json(json config, std::string gerda_pdfs) {
+    std::vector<bkg_comp> comp_map;
+
     // eventually get a global value for the gerda-pdfs path
-    auto gerda_pdfs = config.value("gerda-pdfs", ".");
+    if (gerda_pdfs == "") gerda_pdfs = config.value("gerda-pdfs", ".");
+    // eventually get a global value for the hist name in the ROOT files
     auto hist_name = config.value("hist-name", "");
 
     // loop over first level of "components"
     for (auto& it : config["components"]) {
-        // if there's a different path specified at this level
-        auto prefix = it.value("gerda_pdfs", gerda_pdfs);
-
         /* START INTERMEZZO */
         // utility to sum over the requested parts (with weight) given isotope
         auto sum_parts = [&](std::string i) {
@@ -102,12 +206,12 @@ int main(int argc, char** argv) {
 
                 for (auto& p : it["part"].items()) {
                     // get volume name
-                    auto path_to_part = prefix + "/" + p.key();
+                    auto path_to_part = gerda_pdfs + "/" + p.key();
                     if (path_to_part.back() == '/') path_to_part.pop_back();
                     auto part = path_to_part.substr(path_to_part.find_last_of('/')+1);
                     path_to_part.erase(path_to_part.find_last_of('/'));
                     auto volume = path_to_part.substr(path_to_part.find_last_of('/')+1);
-                    auto filename = prefix + "/" + p.key() + "/" + true_iso + "/" + "pdf-"
+                    auto filename = gerda_pdfs + "/" + p.key() + "/" + true_iso + "/" + "pdf-"
                         + volume + "-" + part + "-" + i + ".root";
                     logs::out(logs::debug) << "opening file " << filename << std::endl;
                     logs::out(logs::debug) << "summing object '" << hist_name << " with weight "
@@ -126,12 +230,12 @@ int main(int argc, char** argv) {
             }
             else if (it["part"].is_string()) {
                 // get volume name
-                auto path_to_part = prefix + "/" + it["part"].get<std::string>();
+                auto path_to_part = gerda_pdfs + "/" + it["part"].get<std::string>();
                 if (path_to_part.back() == '/') path_to_part.pop_back();
                 auto part = path_to_part.substr(path_to_part.find_last_of('/')+1);
                 path_to_part.erase(path_to_part.find_last_of('/'));
                 auto volume = path_to_part.substr(path_to_part.find_last_of('/')+1);
-                auto filename = prefix + "/" + it["part"].get<std::string>() + "/" + true_iso + "/" + "pdf-"
+                auto filename = gerda_pdfs + "/" + it["part"].get<std::string>() + "/" + true_iso + "/" + "pdf-"
                     + volume + "-" + part + "-" + i + ".root";
                 logs::out(logs::debug) << "getting object '" << hist_name << "' in file " << filename << std::endl;
                 // get histogram
@@ -153,7 +257,7 @@ int main(int argc, char** argv) {
                     auto objname = itt["hist-name"].get<std::string>();
                     auto th = utils::get_component(filename, objname, 8000, 0, 8000);
 
-                    factory.AddComponent(th, itt["amount-cts"].get<float>());
+                    comp_map.emplace_back(iso.key(), th, itt["amount-cts"].get<float>());
                 }
             }
             else { // look into gerda-pdfs database
@@ -179,24 +283,10 @@ int main(int argc, char** argv) {
                 else throw std::runtime_error("unexpected entry " + iso.value()["isotope"].dump()
                         + "found in [\"components\"][\"" + iso.key() + "\"][\"isotope\"]");
 
-                factory.AddComponent(comp, iso.value()["amount-cts"].get<float>());
+                comp_map.emplace_back(iso.key(), comp, iso.value()["amount-cts"].get<float>());
             }
         }
     }
 
-    logs::out(logs::debug) << "opening output file" << std::endl;
-    auto outname = utils::get_file_obj(config["output-file"].get<std::string>());
-    TFile fout(outname.first.c_str(), "recreate");
-
-    // now generate the experiment
-    logs::out(logs::debug) << "filling output histogram" << std::endl;
-    TH1D hexp(outname.second.c_str(), "Pseudo experiment", 8000, 0, 8000);
-    factory.FillPseudoExp(hexp);
-
-    hexp.Write();
-
-    logs::out(logs::info) << "object " << outname.second
-                          << " written on file " << outname.first << std::endl;
-
-    return 0;
+    return comp_map;
 }

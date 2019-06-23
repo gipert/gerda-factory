@@ -90,28 +90,30 @@
             }
         }
     ],
-    "pdf-distorsions" : {
-        "prefix" : "../data/distorsions",
+    "pdf-distortions" : {
+        "prefix" : "../data/distortions",
         "global" : {
             "transition-layer" : [
                 "v2.0-RC-2nufit-bjorn",
                 "v2.0-RC-2nufit-zerodl"
             ]
         },
-        "2nbb"      : [ "2nbb-kotilia-iachello.root" ],
-        "Ac228"     : [ "pdf-larveto-fibers-Ac228-larveto.root" ],
-        "K40-far"   : [ "pdf-larveto-copper_shroud-K40-larveto.root" ],
-        "K42-close" : [ "pdf-gedet-pplus_bege-K42-larveto.root" ],
-        "K42-far"   : [ "pdf-lar-above_array-K42-larveto.root" ],
-        "K40-close" : [
-            "pdf-cables-cables_all-K40-larveto.root",
-            "pdf-ge_holders-plates-K40-larveto.root"
-        ],
-        "Bi212-Tl208" : [
-            {
-                "pdf-larveto-fibers-Bi212-larveto.root" : 1,
-                "pdf-larveto-fibers-Tl208-larveto.root" : 0.3539
-            }
-        ]
+        "specific" : {
+            "2nbb"      : [ "2nbb-kotilia-iachello.root" ],
+            "Ac228"     : [ "pdf-larveto-fibers-Ac228-larveto.root" ],
+            "K40-far"   : [ "pdf-larveto-copper_shroud-K40-larveto.root" ],
+            "K42-close" : [ "pdf-gedet-pplus_bege-K42-larveto.root" ],
+            "K42-far"   : [ "pdf-lar-above_array-K42-larveto.root" ],
+            "K40-close" : [
+                "pdf-cables-cables_all-K40-larveto.root",
+                "pdf-ge_holders-plates-K40-larveto.root"
+            ],
+            "Bi212-Tl208" : [
+                {
+                    "pdf-larveto-fibers-Bi212-larveto.root" : 1,
+                    "pdf-larveto-fibers-Tl208-larveto.root" : 0.3539
+                }
+            ]
+        }
     }
 }

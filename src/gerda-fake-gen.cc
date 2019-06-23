@@ -79,7 +79,15 @@ int main(int argc, char** argv) {
 
     // eventually get a global value for the gerda-pdfs path
     auto gerda_pdfs = config.value("gerda-pdfs", ".");
+    // eventually get a global value for the hist name in the ROOT files
     auto hist_name = config.value("hist-name", "");
+    // set range for counts
+    if (config["range-for-counts"].is_array()) {
+        factory.SetCountsRange(
+            config["range-for-counts"][1].get<float>(),
+            config["range-for-counts"][2].get<float>()
+        );
+    }
 
     // loop over first level of "components"
     for (auto& it : config["components"]) {

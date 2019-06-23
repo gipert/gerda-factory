@@ -72,3 +72,8 @@ void GerdaFactory::FillPseudoExp(TH1* out) {
         }
     }
 }
+
+void GerdaFactory::ResetComponents() {
+    for (auto& e : _comp_list) delete e.first;
+    _comp_list.clear();
+}
