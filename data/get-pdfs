@@ -1,0 +1,25 @@
+#!/bin/bash
+
+[ ! -f ./`basename ${0}` ] \
+    && echo "ERROR: must cd where '`basename ${0}`' is before running!" \
+    && exit 1
+
+mkdir -p gerda-pdfs
+echo -n "Set username for gerda-login.lngs.infn.it: "; read user
+rsync -avhuzL --progress $user@gerda-login.lngs.infn.it:/nfs/gerda6/shared/gerda-pdfs/{distorted,gerda-pdfs-latest.tar.xz} ./gerda-pdfs/
+
+for f in `find gerda-pdfs -name '*.tar.xz'`; do
+    outdir=`dirname $f`/`basename $f .tar.xz`
+    if [ ! -d $outdir ]; then
+        echo "INFO: unpacking $f in background"
+        mkdir $outdir
+        tar -C $outdir -xf $f --strip-components 1 &
+    fi
+done
+
+echo "INFO: waiting for the following background jobs to end..."
+jobs
+
+for job in `jobs -rp`; do
+    wait $job
+done

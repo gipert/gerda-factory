@@ -1,0 +1,29 @@
+#!/bin/bash
+
+cpus="$(nproc)"
+
+counter=1
+for f in `find gerda-pdfs/distorted -name '*.tar.xz'`; do
+    dir=`dirname $f`/`basename $f .tar.xz`
+    [ ! -d $dir ] \
+        && echo "ERROR: it seems that you didn't run 'get-pdfs' first" \
+        && exit 1
+
+    filelist=""
+    for ff in `find $dir -name '*-lar.root'`; do
+        filelist="$filelist $ff"
+    done
+
+    ./ROOTroutine.C "$filelist" > /dev/null &
+
+    if [[ $counter == $cpus ]]; then
+        echo "INFO: waiting for the following background jobs to end..."
+        jobs
+        for job in `jobs -rp`; do
+            wait $job
+        done
+        counter=1
+    else
+        let counter++
+    fi
+done
