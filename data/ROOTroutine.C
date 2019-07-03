@@ -35,17 +35,18 @@ void ROOTroutine(const std::string& filelist) {
         system(("mkdir -p distortions/" + dirname + "/" + volume + "/" + part + "/" + isotope).c_str());
 
         TFile fdist(file.c_str());
-        auto hdist = dynamic_cast<TH1*>(fdist.Get("M1_enrBEGe"));
-        hdist->SetName("M1_enrBEGe_dist");
         TFile forig(("gerda-pdfs/gerda-pdfs-latest/" + basepath).c_str());
         if (!forig.IsOpen()) continue;
-        auto horig = dynamic_cast<TH1*>(forig.Get("M1_enrBEGe"));
-
-        horig->Divide(hdist);
-
         TFile fout(outname.c_str(), "recreate");
-        horig->Write();
-        fout.Close();
+
+        for (auto& n : std::vector<std::string>{"M1_enrBEGe", "M1_enrCoax"}) {
+            auto hdist = dynamic_cast<TH1*>(fdist.Get(n.c_str()));
+            hdist->SetName((n + "_dist").c_str());
+            auto horig = dynamic_cast<TH1*>(forig.Get(n.c_str()));
+            horig->Divide(hdist);
+            fout.cd();
+            horig->Write();
+        }
     }
 }
 
