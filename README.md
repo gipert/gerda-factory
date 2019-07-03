@@ -7,7 +7,7 @@ GERDA energy spectra. The `gerda-factory` program allows to take into account
 (randomly) generic energy-dependent deformations, and therefore can be useful
 for studies of systematic uncertainties.
 
-## `gerda-fake-gen`
+### `gerda-fake-gen`
 
 1. compile the project by running `make` at the top of the directory tree. The
    only external dependency is [ROOT](https://root.cern.ch/).
@@ -20,7 +20,7 @@ for studies of systematic uncertainties.
    brief explanation of the syntax)
 4. run `gerda-fake-gen <json-file>` to generate a random experiment
 
-## `gerda-factory`
+### `gerda-factory`
 
 1. compile the project by running `make` at the top of the directory tree.
 2. acquire the official GERDA PDFs:
