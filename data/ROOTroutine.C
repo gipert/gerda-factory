@@ -12,40 +12,83 @@ void ROOTroutine(const std::string& filelist) {
     }
 
     for (const auto& file : files) {
-
         auto f = file;
-        auto fname = f.substr(f.find_last_of('/')+1, f.size());
-        f.erase(f.find_last_of('/'), f.size());
 
-        auto isotope = f.substr(f.find_last_of('/')+1, f.size());
-        f.erase(f.find_last_of('/'), f.size());
+        std::string basepath, outname, dirname;
+        std::vector<std::string> histnames;
+        if (file.find("alphas") == std::string::npos) {
+            auto fname = f.substr(f.find_last_of('/')+1, f.size());
+            f.erase(f.find_last_of('/'), f.size());
 
-        auto part = f.substr(f.find_last_of('/')+1, f.size());
-        f.erase(f.find_last_of('/'), f.size());
+            auto isotope = f.substr(f.find_last_of('/')+1, f.size());
+            f.erase(f.find_last_of('/'), f.size());
 
-        auto volume = f.substr(f.find_last_of('/')+1, f.size());
-        f.erase(f.find_last_of('/'), f.size());
+            auto part = f.substr(f.find_last_of('/')+1, f.size());
+            f.erase(f.find_last_of('/'), f.size());
 
-        auto dirname = f.substr(f.find_last_of('/')+1, f.size());
-        f.erase(f.find_last_of('/'), f.size());
+            auto volume = f.substr(f.find_last_of('/')+1, f.size());
+            f.erase(f.find_last_of('/'), f.size());
 
-        auto basepath = volume + "/" + part + "/" + isotope + "/" + fname;
-        auto outname = "distortions/" + dirname + "/" + basepath;
+            dirname = f.substr(f.find_last_of('/')+1, f.size());
+            f.erase(f.find_last_of('/'), f.size());
 
-        system(("mkdir -p distortions/" + dirname + "/" + volume + "/" + part + "/" + isotope).c_str());
+            basepath = volume + "/" + part + "/" + isotope + "/" + fname;
+            system(("mkdir -p distortions/" + dirname + "/" + volume + "/" + part + "/" + isotope).c_str());
+
+            histnames = {"M1_enrBEGe", "M1_enrCoax"};
+        }
+        // hack for alphas
+        else {
+            auto fname = f.substr(f.find_last_of('/')+1, f.size());
+            f.erase(f.find_last_of('/'), f.size());
+
+            auto category = f.substr(f.find_last_of('/')+1, f.size());
+            f.erase(f.find_last_of('/'), f.size());
+
+            auto volume = f.substr(f.find_last_of('/')+1, f.size());
+            f.erase(f.find_last_of('/'), f.size());
+
+            dirname = f.substr(f.find_last_of('/')+1, f.size());
+            f.erase(f.find_last_of('/'), f.size());
+
+            basepath = volume + "/" + category + "/" + fname;
+            system(("mkdir -p distortions/" + dirname + "/" + volume + "/" + category).c_str());
+
+            histnames = {"ramp", "flat"};
+        }
+
+        outname = "distortions/" + dirname + "/" + basepath;
 
         TFile fdist(file.c_str());
         TFile forig(("gerda-pdfs/gerda-pdfs-latest/" + basepath).c_str());
         if (!forig.IsOpen()) continue;
         TFile fout(outname.c_str(), "recreate");
 
-        for (auto& n : std::vector<std::string>{"M1_enrBEGe", "M1_enrCoax"}) {
-            auto hdist = dynamic_cast<TH1*>(fdist.Get(n.c_str()));
-            hdist->SetName((n + "_dist").c_str());
-            auto horig = dynamic_cast<TH1*>(forig.Get(n.c_str()));
-            horig->Divide(hdist);
-            fout.cd();
-            horig->Write();
+        for (auto& n : histnames) {
+            auto obj = forig.Get(n.c_str());
+            if (!obj) {
+                std::cerr << "could not find object " << n << " in " << file << std::endl;
+                continue;
+            }
+            if (obj->InheritsFrom(TH1::Class())) {
+                auto horig = dynamic_cast<TH1*>(obj);
+                horig->SetName((n + "_orig").c_str());
+                auto hdist = dynamic_cast<TH1*>(fdist.Get(n.c_str()));
+                if (!hdist) {
+                    std::cerr << "could not find object " << n << " in "
+                              << "gerda-pdfs/gerda-pdfs-latest/" + basepath << std::endl;
+                    continue;
+                }
+                horig->Divide(hdist);
+                fout.cd();
+                horig->Write(n.c_str());
+            }
+            // for alphas, do not calculate distortion
+            else if (obj->InheritsFrom(TF1::Class())) {
+                auto horig = dynamic_cast<TF1*>(obj);
+                fout.cd();
+                horig->Write(n.c_str());
+            }
         }
     }
 }

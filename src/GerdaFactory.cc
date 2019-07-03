@@ -16,7 +16,7 @@ GerdaFactory::~GerdaFactory() {
 }
 
 void GerdaFactory::SetCountsRange(float xmin, float xmax) {
-    if (!(xmin == 0 and xmax == 0) || xmax < xmin) throw std::runtime_error("GerdaFactory::SetCountsRange] invalid range.");
+    if (!(xmin == 0 and xmax == 0) and xmax < xmin) throw std::runtime_error("GerdaFactory::SetCountsRange] invalid range.");
     _range.first = xmin;
     _range.second = xmax;
 }

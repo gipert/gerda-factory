@@ -67,7 +67,7 @@ namespace utils {
 
     namespace logging {
 
-        enum level {debug, info, warning, error};
+        enum level {debug, detail, info, warning, error};
         level min_level = info;
         std::ofstream devnull("/dev/null");
 
@@ -75,6 +75,10 @@ namespace utils {
 
             if (lvl == debug and min_level <= debug) {
                 std::cout << "\033[36m[ Debug:\033[0m ";
+                return std::cout;
+            }
+            if (lvl == detail and min_level <= detail) {
+                std::cout << "\033[34m[ Detail:\033[0m ";
                 return std::cout;
             }
             if (lvl == info and min_level <= info) {

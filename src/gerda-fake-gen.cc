@@ -17,11 +17,12 @@ using json = nlohmann::json;
 
 namespace utils { namespace logging {
     NLOHMANN_JSON_SERIALIZE_ENUM(utils::logging::level, {
-            {utils::logging::debug,   "debug"},
-            {utils::logging::info,    "info"},
-            {utils::logging::warning, "warning"},
-            {utils::logging::error,   "error"},
-            })
+        {utils::logging::debug,   "debug"},
+        {utils::logging::detail,  "detail"},
+        {utils::logging::info,    "info"},
+        {utils::logging::warning, "warning"},
+        {utils::logging::error,   "error"},
+    })
 }}
 
 int main(int argc, char** argv) {
@@ -84,8 +85,8 @@ int main(int argc, char** argv) {
     // set range for counts
     if (config["range-for-counts"].is_array()) {
         factory.SetCountsRange(
-            config["range-for-counts"][1].get<float>(),
-            config["range-for-counts"][2].get<float>()
+            config["range-for-counts"][0].get<float>(),
+            config["range-for-counts"][1].get<float>()
         );
     }
 
@@ -152,7 +153,7 @@ int main(int argc, char** argv) {
 
         // loop over requested isotopes on the relative part
         for (auto& iso : it["components"].items()) {
-            logs::out(logs::debug) << "building pdf for entry " << iso.key() << std::endl;
+            logs::out(logs::detail) << "building pdf for entry " << iso.key() << std::endl;
 
             // it's a user defined file
             if (it.contains("root-file")) {
@@ -197,7 +198,7 @@ int main(int argc, char** argv) {
     TFile fout(outname.first.c_str(), "recreate");
 
     // now generate the experiment
-    logs::out(logs::debug) << "filling output histogram" << std::endl;
+    logs::out(logs::detail) << "filling output histogram" << std::endl;
     TH1D hexp(outname.second.c_str(), "Pseudo experiment", 8000, 0, 8000);
     factory.FillPseudoExp(hexp);
 

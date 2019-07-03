@@ -1,12 +1,13 @@
 {
-    "logging" : "debug",
+    "logging" : "detail",
     "output-file" : "../results/phIIAfterLAr-exp-pool.root",
     "range-for-counts" : [565, 2000],
-    "gerda-pdfs" : "../data/gerda-pdfs/v2.0-RC",
+    "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-latest",
+    "number-of-experiments" : 100,
     "hist-name" : "M1_enrBEGe",
     "components" : [
         {
-            "root-file" : "../data/gerda-pdfs/v2.0-RC/alphas/analytic/pdf-functions.root",
+            "root-file" : "../data/gerda-pdfs/gerda-pdfs-latest/alphas/analytic/pdf-functions.root",
             "components" : {
                 "alpha-slope" : {
                     "hist-name" : "ramp",
@@ -22,15 +23,15 @@
             "part": "cables/cables_all",
             "components" : {
                 "Bi212-Tl208" : {
-                    "isotope" : { "Tl208-larveto" : 0.3539, "Bi212-larveto" : 1 },
+                    "isotope" : { "Tl208-lar" : 0.3539, "Bi212-lar" : 1 },
                     "amount-cts" : 36
                 },
                 "Pb214-Bi214" : {
-                    "isotope" : { "Bi214-larveto" : 1, "Pb214-larveto" : 1 },
+                    "isotope" : { "Bi214-lar" : 1, "Pb214-lar" : 1 },
                     "amount-cts" : 79
                 },
                 "Co60" : {
-                    "isotope": "Co60-larveto",
+                    "isotope": "Co60-lar",
                     "amount-cts" : 25
                 }
             }
@@ -39,7 +40,7 @@
             "part": "gedet/intrinsic_bege",
             "components" : {
                 "2nbb" : {
-                    "isotope" : "2nbb-larveto",
+                    "isotope" : "2nbb-lar",
                     "amount-cts" : 45635
                 }
             }
@@ -48,7 +49,7 @@
             "part": "ge_holders/plates",
             "components" : {
                 "Ac228" : {
-                    "isotope" : "Ac228-larveto",
+                    "isotope" : "Ac228-lar",
                     "amount-cts" : 113
                 }
             }
@@ -57,7 +58,7 @@
             "part": "minishroud/ms_all",
             "components" : {
                 "K40-close" : {
-                    "isotope" : "K40-larveto",
+                    "isotope" : "K40-lar",
                     "amount-cts" : 1583
                 }
             }
@@ -66,7 +67,7 @@
             "part": "electronics/cc3",
             "components" : {
                 "K40-far" : {
-                    "isotope" : "K40-larveto",
+                    "isotope" : "K40-lar",
                     "amount-cts" : 953
                 }
             }
@@ -75,7 +76,7 @@
             "part": "lar/sur_array",
             "components" : {
                 "K42-far" : {
-                    "isotope" : "K42-larveto",
+                    "isotope" : "K42-lar",
                     "amount-cts" : 1313
                 }
             }
@@ -84,7 +85,7 @@
             "part": "gedet/nplus_bege",
             "components" : {
                 "K42-close" : {
-                    "isotope" : "K42-larveto",
+                    "isotope" : "K42-lar",
                     "amount-cts" : 316
                 }
             }
@@ -94,25 +95,25 @@
         "prefix" : "../data/distortions",
         "global" : {
             "transition-layer" : [
-                "v2.0-RC-2nufit-bjorn",
-                "v2.0-RC-2nufit-zerodl"
+                "gerda-pdfs-2nufit-tlayer-bjorn",
+                "gerda-pdfs-2nufit-tlayer-zerodl"
+            ],
+            "LAr-veto-model" : [
+                "gerda-pdfs-2nufit-larmodel-manual-f2_0",
+                "gerda-pdfs-2nufit-larmodel-manual-f0_5",
+                "gerda-pdfs-2nufit-larmodel-manual-x0_5",
+                "gerda-pdfs-2nufit-larmodel-manual-x2_0"
             ]
         },
         "specific" : {
-            "2nbb"      : [ "2nbb-kotilia-iachello.root" ],
-            "Ac228"     : [ "pdf-larveto-fibers-Ac228-larveto.root" ],
-            "K40-far"   : [ "pdf-larveto-copper_shroud-K40-larveto.root" ],
-            "K42-close" : [ "pdf-gedet-pplus_bege-K42-larveto.root" ],
-            "K42-far"   : [ "pdf-lar-above_array-K42-larveto.root" ],
-            "K40-close" : [
-                "pdf-cables-cables_all-K40-larveto.root",
-                "pdf-ge_holders-plates-K40-larveto.root"
-            ],
-            "Bi212-Tl208" : [
-                {
-                    "pdf-larveto-fibers-Bi212-larveto.root" : 1,
-                    "pdf-larveto-fibers-Tl208-larveto.root" : 0.3539
-                }
+            "Ac228"       : [ "pdf-Ac228-holders_vs_fibers-lar.root" ],
+            "K40-far"     : [ "pdf-K40_far-cc3_vs_copper_shroud-lar.root" ],
+            "K42-close"   : [ "pdf-K42_close-nplus_bege_vs_pplus_bege-lar.root" ],
+            "K42-far"     : [ "pdf-K42_far-sur_array_vs_above_array-lar.root" ],
+            "Bi212-Tl208" : [ "pdf-Bi212_Tl208-cables_vs_fibers-lar.root" ],
+            "K40-close"   : [
+                "pdf-K40_close-minishroud_vs_cables-lar.root",
+                "pdf-K40_close-minishroud_vs_holders-lar.root"
             ]
         }
     }

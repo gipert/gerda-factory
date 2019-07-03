@@ -1,12 +1,12 @@
 {
-    "logging" : "info",
+    "logging" : "detail",
     "output-file" : "../results/phIIAfterLAr-fake.root:M1_enrBEGe",
     "range-for-counts" : [565, 2000],
-    "gerda-pdfs" : "../data/gerda-pdfs/v2.0-RC",
+    "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-latest",
     "hist-name" : "M1_enrBEGe",
     "components" : [
         {
-            "root-file" : "../data/gerda-pdfs/v2.0-RC/alphas/analytic/pdf-functions.root",
+            "root-file" : "../data/gerda-pdfs/gerda-pdfs-latest/alphas/analytic/pdf-functions.root",
             "components" : {
                 "alpha-slope" : {
                     "hist-name" : "ramp",
@@ -22,15 +22,15 @@
             "part": "cables/cables_all",
             "components" : {
                 "Bi212-Tl208" : {
-                    "isotope" : { "Tl208-larveto" : 0.3539, "Bi212-larveto" : 1 },
+                    "isotope" : { "Tl208-lar" : 0.3539, "Bi212-lar" : 1 },
                     "amount-cts" : 36
                 },
                 "Pb214-Bi214" : {
-                    "isotope" : { "Bi214-larveto" : 1, "Pb214-larveto" : 1 },
+                    "isotope" : { "Bi214-lar" : 1, "Pb214-lar" : 1 },
                     "amount-cts" : 79
                 },
                 "Co60" : {
-                    "isotope": "Co60-larveto",
+                    "isotope": "Co60-lar",
                     "amount-cts" : 25
                 }
             }
@@ -39,7 +39,7 @@
             "part": "gedet/intrinsic_bege",
             "components" : {
                 "2nbb" : {
-                    "isotope" : "2nbb-larveto",
+                    "isotope" : "2nbb-lar",
                     "amount-cts" : 45635
                 }
             }
@@ -48,7 +48,7 @@
             "part": "ge_holders/plates",
             "components" : {
                 "Ac228" : {
-                    "isotope" : "Ac228-larveto",
+                    "isotope" : "Ac228-lar",
                     "amount-cts" : 113
                 }
             }
@@ -57,7 +57,7 @@
             "part": "minishroud/ms_all",
             "components" : {
                 "K40-close" : {
-                    "isotope" : "K40-larveto",
+                    "isotope" : "K40-lar",
                     "amount-cts" : 1583
                 }
             }
@@ -66,7 +66,7 @@
             "part": "electronics/cc3",
             "components" : {
                 "K40-far" : {
-                    "isotope" : "K40-larveto",
+                    "isotope" : "K40-lar",
                     "amount-cts" : 953
                 }
             }
@@ -75,7 +75,7 @@
             "part": "lar/sur_array",
             "components" : {
                 "K42-far" : {
-                    "isotope" : "K42-larveto",
+                    "isotope" : "K42-lar",
                     "amount-cts" : 1313
                 }
             }
@@ -84,7 +84,7 @@
             "part": "gedet/nplus_bege",
             "components" : {
                 "K42-close" : {
-                    "isotope" : "K42-larveto",
+                    "isotope" : "K42-lar",
                     "amount-cts" : 316
                 }
             }
