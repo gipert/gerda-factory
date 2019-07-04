@@ -134,3 +134,7 @@ The syntax is the following:
         }
     }
 ```
+
+### Related project
+
+- [gerda-fitter](https://github.com/gipert/gerda-fitter)
