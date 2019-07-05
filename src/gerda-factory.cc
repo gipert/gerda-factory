@@ -29,19 +29,38 @@ namespace utils { namespace logging {
 
 struct bkg_comp {
     std::string name;
-    TH1* hist;
+    TH1* hist; // the struct will own the histogram pointer!
     float counts;
 
-    ~bkg_comp() { delete hist; }
-    bkg_comp(std::string n, TH1* h, float c) :
-        name(n), hist(h), counts(c) {}
-    bkg_comp(bkg_comp const& orig) :
+    // destructor
+    ~bkg_comp() {
+        std::cout << "calling ~bkg_comp() for " << name << "... calling delete on " << hist << "... ";
+        if (!hist) std::cout << "!!!!! hist is null" << std::endl;
+        else if (hist == nullptr) std::cout << "!!!!! hist is null" << std::endl;
+        else delete hist;
+        std::cout << "done" << std::endl;
+    }
+    // constructor
+    bkg_comp(const std::string& n, TH1* h, float c) :
+        name(n), counts(c) {
+        hist = h;
+    }
+    // copy constructor
+    bkg_comp(const bkg_comp& orig) :
         name(orig.name),
-        hist(dynamic_cast<TH1*>(orig.hist->Clone())),
-        counts(orig.counts) {}
+        counts(orig.counts) {
+        hist = dynamic_cast<TH1*>(orig.hist->Clone());
+    }
+    bkg_comp& operator=(const bkg_comp& orig) {
+        if (this == &orig) return *this;
+        name = orig.name;
+        hist = dynamic_cast<TH1*>(orig.hist->Clone());
+        counts = orig.counts;
+        return *this;
+    }
 };
 
-std::vector<bkg_comp> get_components_json(json config, std::string gerda_pdfs = "");
+std::vector<bkg_comp> get_components_json(json& config, std::string gerda_pdfs = "");
 
 int main(int argc, char** argv) {
 
@@ -104,9 +123,9 @@ int main(int argc, char** argv) {
         );
     }
 
-    logs::out(logs::detail) << "getting base component list from json config" << std::endl;
+    logs::out(logs::detail) << "getting base component list from JSON config" << std::endl;
     auto comp_list = get_components_json(config);
-    // save it, we'll need it to reset the factory before the next iterations
+    // save it (deep copy), we'll need it after resetting the factory before the next iterations
     const auto comp_list_save = comp_list;
 
     if (!config["pdf-distortions"].is_object()) {
@@ -121,16 +140,17 @@ int main(int argc, char** argv) {
 
     // output file
     logs::out(logs::debug) << "opening output file" << std::endl;
-    auto outname = utils::get_file_obj(config["output-file"].get<std::string>());
+    auto outname = utils::get_file_obj(config["output"]["file"].get<std::string>());
     system(("mkdir -p " + outname.first.substr(0, outname.first.find_last_of('/'))).c_str());
     TFile fout(outname.first.c_str(), "recreate");
 
-    auto niter = config.value("numer-of-experiments", 100);
+    auto niter = config.value("number-of-experiments", 100);
     logs::out(logs::info) << "generating " << niter << " experiments..." << std::endl;
     for (int i = 0; i < niter; ++i) {
         // reset components
-        comp_list = comp_list_save;
         factory.ResetComponents();
+        comp_list.clear();
+        comp_list = comp_list_save;
 
         bool done_something = false;
         // for distortions given with gerda-pdfs structure
@@ -229,19 +249,27 @@ int main(int argc, char** argv) {
 
         // now generate the experiment
         logs::out(logs::detail) << "filling output histogram" << std::endl;
-        TH1D hexp(outname.second.c_str(), "Pseudo experiment", 8000, 0, 8000);
+        TH1D hexp(
+            ((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str(),
+            "Pseudo experiment",
+            config["output"].value("number-of-bins", 8000),
+            config["output"].value("xaxis-range", std::vector<int>{0, 8000})[0],
+            config["output"].value("xaxis-range", std::vector<int>{0, 8000})[1]
+        );
         factory.FillPseudoExp(hexp);
 
         fout.cd();
         hexp.Write();
 
-        logs::out(logs::debug) << "object " << outname.second
-                              << " written on file " << outname.first << std::endl;
+        logs::out(logs::debug) << "object " << hexp.GetName()
+                               << " written on file " << outname.first << std::endl;
     }
+    logs::out(logs::debug) << "exiting" << std::endl;
+
     return 0;
 }
 
-std::vector<bkg_comp> get_components_json(json config, std::string gerda_pdfs) {
+std::vector<bkg_comp> get_components_json(json& config, std::string gerda_pdfs) {
     std::vector<bkg_comp> comp_map;
 
     // eventually get a global value for the gerda-pdfs path
@@ -277,15 +305,17 @@ std::vector<bkg_comp> get_components_json(json config, std::string gerda_pdfs) {
                     logs::out(logs::debug) << "opening file " << filename << std::endl;
                     logs::out(logs::debug) << "summing object '" << hist_name << " with weight "
                                            << p.value().get<double>()/sumw << std::endl;
-                    // get histogram
+                    // get histogram (owned by us)
                     auto thh = utils::get_component(filename, hist_name, 8000, 0, 8000);
                     // add it with weight
                     if (!sum) {
                         sum = thh;
-                        sum->SetDirectory(nullptr); // please do not delete it when the TFile goes out of scope
                         sum->Scale(p.value().get<double>()/sumw);
                     }
-                    else sum->Add(thh, p.value().get<double>()/sumw);
+                    else {
+                        sum->Add(thh, p.value().get<double>()/sumw);
+                        delete thh;
+                    }
                 }
                 return sum;
             }
@@ -299,7 +329,7 @@ std::vector<bkg_comp> get_components_json(json config, std::string gerda_pdfs) {
                 auto filename = gerda_pdfs + "/" + it["part"].get<std::string>() + "/" + true_iso + "/" + "pdf-"
                     + volume + "-" + part + "-" + i + ".root";
                 logs::out(logs::debug) << "getting object '" << hist_name << "' in file " << filename << std::endl;
-                // get histogram
+                // get histogram (owned by us)
                 auto thh = utils::get_component(filename, hist_name, 8000, 0, 8000);
                 return thh;
             }
@@ -307,19 +337,19 @@ std::vector<bkg_comp> get_components_json(json config, std::string gerda_pdfs) {
         };
         /* END INTERMEZZO */
 
-        // loop over requested isotopes on the relative part
+        // loop over the second level of components
         for (auto& iso : it["components"].items()) {
             logs::out(logs::debug) << "building pdf for entry " << iso.key() << std::endl;
 
             // it's a user defined file
             if (it.contains("root-file")) {
                 auto filename = it["root-file"].get<std::string>();
-                for (auto& itt : it["components"]) {
-                    auto objname = itt["hist-name"].get<std::string>();
-                    auto th = utils::get_component(filename, objname, 8000, 0, 8000);
+                auto objname = iso.value()["hist-name"].get<std::string>();
+                auto th = utils::get_component(filename, objname, 8000, 0, 8000);
+                th->SetName((iso.key() + "_" + std::string(th->GetName())).c_str());
 
-                    comp_map.emplace_back(iso.key(), th, itt["amount-cts"].get<float>());
-                }
+                // comp_map now owns the histogram
+                comp_map.emplace_back(iso.key(), th, iso.value()["amount-cts"].get<float>());
             }
             else { // look into gerda-pdfs database
                 TH1* comp = nullptr;
@@ -337,13 +367,19 @@ std::vector<bkg_comp> get_components_json(json config, std::string gerda_pdfs) {
                             comp = sum_parts(i.key());
                             comp->Scale(i.value().get<double>()/sumwi);
                         }
-                        else comp->Add(sum_parts(i.key()), i.value().get<double>()/sumwi);
+                        else {
+                            auto _tmp = sum_parts(i.key());
+                            comp->Add(_tmp, i.value().get<double>()/sumwi);
+                            delete _tmp;
+                        }
 
                     }
                 }
                 else throw std::runtime_error("unexpected entry " + iso.value()["isotope"].dump()
                         + "found in [\"components\"][\"" + iso.key() + "\"][\"isotope\"]");
 
+                // comp_map now owns the histogram
+                comp->SetName((iso.key() + "_" + std::string(comp->GetName())).c_str());
                 comp_map.emplace_back(iso.key(), comp, iso.value()["amount-cts"].get<float>());
             }
         }

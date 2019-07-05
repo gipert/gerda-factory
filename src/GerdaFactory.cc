@@ -5,6 +5,7 @@
  *
  */
 #include "GerdaFactory.h"
+#include <iostream>
 
 GerdaFactory::GerdaFactory() :
     _rndgen(0),
@@ -12,7 +13,9 @@ GerdaFactory::GerdaFactory() :
 }
 
 GerdaFactory::~GerdaFactory() {
-    for (auto& el : _comp_list) delete el.first;
+    std::cout << "calling ~GerdaFactory()... ";
+    this->ResetComponents();
+    std::cout << "done" << std::endl;
 }
 
 void GerdaFactory::SetCountsRange(float xmin, float xmax) {
@@ -21,6 +24,7 @@ void GerdaFactory::SetCountsRange(float xmin, float xmax) {
     _range.second = xmax;
 }
 
+// creates an internal copy of the histogram pointer
 void GerdaFactory::AddComponent(const TH1* hist, const float counts) {
     if (!hist) throw std::runtime_error("GerdaFactory::AddComponent] invalid pointer detected.");
     if (counts < 0) throw std::runtime_error("GerdaFactory::AddComponent] counts argument is < 0.");

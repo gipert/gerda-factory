@@ -3,7 +3,7 @@
 # Author: Luigi Pertoldi - pertoldi@pd.infn.it
 # Created: Tue 18 Jun 2019
 #
-CXX      = c++ -Wall -std=c++11 -O3
+CXX      = c++ -Wall -Wextra -std=c++11 -g -O0
 CXXFLAGS = $$(root-config --cflags)
 LIBS     = $$(root-config --libs) -lMinuit -lTreePlayer
 

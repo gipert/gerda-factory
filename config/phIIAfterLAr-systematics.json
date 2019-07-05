@@ -1,6 +1,10 @@
 {
-    "logging" : "detail",
-    "output-file" : "../results/phIIAfterLAr-exp-pool.root",
+    "logging" : "debug",
+    "output" : {
+        "file" : "../results/phIIAfterLAr-exp-pool.root",
+        "number-of-bins" : 8000,
+        "xaxis-range" : [0, 8000]
+    },
     "range-for-counts" : [565, 2000],
     "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-latest",
     "number-of-experiments" : 100,
@@ -31,11 +35,11 @@
                     "amount-cts" : 79
                 },
                 "Co60" : {
-                    "isotope": "Co60-lar",
+                    "isotope" : "Co60-lar",
                     "amount-cts" : 25
                 }
             }
-        },
+    },
         {
             "part": "gedet/intrinsic_bege",
             "components" : {
@@ -93,18 +97,6 @@
     ],
     "pdf-distortions" : {
         "prefix" : "../data/distortions",
-        "global" : {
-            "transition-layer" : [
-                "gerda-pdfs-2nufit-tlayer-bjorn",
-                "gerda-pdfs-2nufit-tlayer-zerodl"
-            ],
-            "LAr-veto-model" : [
-                "gerda-pdfs-2nufit-larmodel-manual-f2_0",
-                "gerda-pdfs-2nufit-larmodel-manual-f0_5",
-                "gerda-pdfs-2nufit-larmodel-manual-x0_5",
-                "gerda-pdfs-2nufit-larmodel-manual-x2_0"
-            ]
-        },
         "specific" : {
             "Ac228"       : [ "pdf-Ac228-holders_vs_fibers-lar.root" ],
             "K40-far"     : [ "pdf-K40_far-cc3_vs_copper_shroud-lar.root" ],

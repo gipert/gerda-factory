@@ -17,6 +17,7 @@
 
 namespace utils {
 
+    // The returned TH1 is owned by the user
     TH1* get_component(std::string filename, std::string objectname, int nbinsx = 100, double xmin = 0, double xmax = 100) {
         TFile _tf(filename.c_str());
         if (!_tf.IsOpen()) throw std::runtime_error("invalid ROOT file: " + filename);
