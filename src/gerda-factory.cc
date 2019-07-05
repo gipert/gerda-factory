@@ -33,13 +33,7 @@ struct bkg_comp {
     float counts;
 
     // destructor
-    ~bkg_comp() {
-        std::cout << "calling ~bkg_comp() for " << name << "... calling delete on " << hist << "... ";
-        if (!hist) std::cout << "!!!!! hist is null" << std::endl;
-        else if (hist == nullptr) std::cout << "!!!!! hist is null" << std::endl;
-        else delete hist;
-        std::cout << "done" << std::endl;
-    }
+    ~bkg_comp() { delete hist; }
     // constructor
     bkg_comp(const std::string& n, TH1* h, float c) :
         name(n), counts(c) {

@@ -13,9 +13,7 @@ GerdaFactory::GerdaFactory() :
 }
 
 GerdaFactory::~GerdaFactory() {
-    std::cout << "calling ~GerdaFactory()... ";
     this->ResetComponents();
-    std::cout << "done" << std::endl;
 }
 
 void GerdaFactory::SetCountsRange(float xmin, float xmax) {

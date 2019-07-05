@@ -29,7 +29,7 @@ for studies of systematic uncertainties.
    ./get-pdfs
    ```
 3. compute distortion functions from the different PDF versions:
-   ```
+   ```console
    cd data
    ./compute-distortions
    ```
