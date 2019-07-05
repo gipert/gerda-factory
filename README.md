@@ -45,7 +45,11 @@ The JSON config file for the `gerda-fake-gen` program begins with some general s
 {
     "id" : "phIIAfterLAr",  // model name
     "logging" : "info",     // verbosity level, choose between {debug, detail, info, warning, error}
-    "output-file" : "../results/phIIAfterLAr-fake.root:M1_enrBEGe", // output filename (and ROOT object name)
+    "output" : {  // output settings
+        "file" : "../results/phIIAfterLAr-exp-pool.root:eventual_name",  // output filename (and ROOT object name)
+        "number-of-bins" : 8000,
+        "xaxis-range" : [0, 8000]
+    },
     "range-for-counts" : [565, 2000],  // histogram range in which the number of counts specified in the following
                                        // should be considered
     "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-latest",  // default value for the location of the GERDA PDFs
