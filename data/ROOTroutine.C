@@ -60,7 +60,7 @@ void ROOTroutine(const std::string& filelist) {
         outname = "distortions/" + dirname + "/" + basepath;
 
         TFile fdist(file.c_str());
-        TFile forig(("gerda-pdfs/gerda-pdfs-latest/" + basepath).c_str());
+        TFile forig(("gerda-pdfs/gerda-pdfs-best/" + basepath).c_str());
         if (!forig.IsOpen()) continue;
         TFile fout(outname.c_str(), "recreate");
 
@@ -76,7 +76,7 @@ void ROOTroutine(const std::string& filelist) {
                 auto hdist = dynamic_cast<TH1*>(fdist.Get(n.c_str()));
                 if (!hdist) {
                     std::cerr << "could not find object " << n << " in "
-                              << "gerda-pdfs/gerda-pdfs-latest/" + basepath << std::endl;
+                              << "gerda-pdfs/gerda-pdfs-best/" + basepath << std::endl;
                     continue;
                 }
                 horig->Divide(hdist);

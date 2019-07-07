@@ -6,7 +6,9 @@
 
 mkdir -p gerda-pdfs
 echo -n "Set username for gerda-login.lngs.infn.it: "; read user
-rsync -avhuzL --progress $user@gerda-login.lngs.infn.it:/nfs/gerda6/shared/gerda-pdfs/{distorted,gerda-pdfs-latest.tar.xz} ./gerda-pdfs/
+rsync -avhuzL --progress \
+    $user@gerda-login.lngs.infn.it:/nfs/gerda6/shared/gerda-pdfs/2nbb-fit/{distorted,gerda-pdfs-best.tar.xz} \
+    ./gerda-pdfs/
 
 for f in `find gerda-pdfs -name '*.tar.xz'`; do
     outdir=`dirname $f`/`basename $f .tar.xz`
