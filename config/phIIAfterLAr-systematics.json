@@ -6,12 +6,12 @@
         "xaxis-range" : [0, 8000]
     },
     "range-for-counts" : [565, 2000],
-    "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-latest",
+    "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-best",
     "number-of-experiments" : 100,
     "hist-name" : "M1_enrBEGe",
     "components" : [
         {
-            "root-file" : "../data/gerda-pdfs/gerda-pdfs-latest/alphas/analytic/pdf-functions.root",
+            "root-file" : "../data/gerda-pdfs/gerda-pdfs-best/alphas/analytic/pdf-functions.root",
             "components" : {
                 "alpha-slope" : {
                     "hist-name" : "ramp",
@@ -97,6 +97,16 @@
     ],
     "pdf-distortions" : {
         "prefix" : "../data/distortions",
+        "global" : {
+            "LAr-veto-model" : [
+                "gerda-pdfs-2nufit-larmodel-manual-f0_5",
+                "gerda-pdfs-2nufit-larmodel-manual-f2_0"
+            ],
+            "transition-layer" : [
+                "gerda-pdfs-2nufit-tlayer-zerodl",
+                "gerda-pdfs-2nufit-tlayer-zerotl"
+            ]
+        },
         "specific" : {
             "Ac228"       : [ "pdf-Ac228-holders_vs_fibers-lar.root" ],
             "K40-far"     : [ "pdf-K40_far-cc3_vs_copper_shroud-lar.root" ],

@@ -1,13 +1,11 @@
 //usr/bin/env root -l -b -q -x ${0}\(\""${1}"\"\); exit $?
 
 void ROOTroutine(const std::string& filelist) {
-    std::cout << filelist << std::endl;
     std::istringstream ss(filelist);
     std::vector<std::string> files;
 
     std::string word;
     while (ss >> word) {
-        ss >> word;
         files.push_back(word);
     }
 
@@ -61,7 +59,11 @@ void ROOTroutine(const std::string& filelist) {
 
         TFile fdist(file.c_str());
         TFile forig(("gerda-pdfs/gerda-pdfs-best/" + basepath).c_str());
-        if (!forig.IsOpen()) continue;
+        if (!forig.IsOpen()) {
+            std::cerr << "WARNING: could not find " << "gerda-pdfs/gerda-pdfs-best/"
+                      << basepath << std::endl;
+            continue;
+        }
         TFile fout(outname.c_str(), "recreate");
 
         for (auto& n : histnames) {
