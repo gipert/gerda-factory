@@ -99,6 +99,8 @@
         "prefix" : "../data/distortions",
         "global" : {
             "LAr-veto-model" : [
+                "gerda-pdfs-2nufit-larmodel-manual-x0_5",
+                "gerda-pdfs-2nufit-larmodel-manual-x2_0",
                 "gerda-pdfs-2nufit-larmodel-manual-f0_5",
                 "gerda-pdfs-2nufit-larmodel-manual-f2_0"
             ],
