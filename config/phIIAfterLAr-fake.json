@@ -1,6 +1,10 @@
 {
-    "logging" : "detail",
-    "output-file" : "../results/phIIAfterLAr-fake.root:M1_enrBEGe",
+    "logging" : "info",
+    "output" : {
+        "file" : "../results/phIIAfterLAr-fake.root:M1_enrBEGe",
+        "number-of-bins" : 8000,
+        "xaxis-range" : [0, 8000]
+    },
     "range-for-counts" : [565, 2000],
     "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-latest",
     "hist-name" : "M1_enrBEGe",
