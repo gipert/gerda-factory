@@ -6,6 +6,7 @@
  */
 #include <iostream>
 #include <string>
+#include <memory>
 
 #include "TFile.h"
 #include "TH1.h"
@@ -22,40 +23,34 @@ namespace utils {
 
     struct bkg_comp {
         std::string name;
-        TH1* hist; // the struct will own the histogram pointer!
+        std::unique_ptr<TH1> hist;
         float counts;
 
-        // destructor
-        ~bkg_comp() { delete hist; }
         // constructor
         bkg_comp(const std::string& n, TH1* h, float c) :
-            name(n), counts(c) {
-            hist = h;
-        }
-        // copy constructor
+            name(n), hist(h), counts(c) {}
+        // (deep) copy constructor
         bkg_comp(const bkg_comp& orig) :
             name(orig.name),
-            counts(orig.counts) {
-            hist = dynamic_cast<TH1*>(orig.hist->Clone());
-        }
-        bkg_comp& operator=(const bkg_comp& orig) {
-            if (this == &orig) return *this;
-            name = orig.name;
-            hist = dynamic_cast<TH1*>(orig.hist->Clone());
-            counts = orig.counts;
-            return *this;
-        }
+            hist(dynamic_cast<TH1*>(orig.hist->Clone())),
+            counts(orig.counts) {}
+    };
+
+    std::vector<bkg_comp> deep_copy(const std::vector<bkg_comp>& orig) {
+        std::vector<utils::bkg_comp> out;
+        for (auto& el : orig) out.emplace_back(el);
+        return out;
     };
 
     // The returned TH1 is owned by the user
-    TH1* get_component(std::string filename, std::string objectname, int nbinsx = 100, double xmin = 0, double xmax = 100) {
+    std::unique_ptr<TH1> get_component(std::string filename, std::string objectname, int nbinsx = 100, double xmin = 0, double xmax = 100) {
         TFile _tf(filename.c_str());
         if (!_tf.IsOpen()) throw std::runtime_error("invalid ROOT file: " + filename);
         auto obj = _tf.Get(objectname.c_str());
         if (!obj) throw std::runtime_error("could not find object '" + objectname + "' in file " + filename);
         // please do not delete it when the TFile goes out of scope
         if (obj->InheritsFrom(TH1::Class())) {
-            auto _th = dynamic_cast<TH1*>(obj);
+            std::unique_ptr<TH1> _th(dynamic_cast<TH1*>(obj));
             if (_th->GetDimension() > 1) throw std::runtime_error("TH2/TH3 are not supported yet");
 
             TParameter<Long64_t>* _nprim = nullptr;
@@ -69,15 +64,15 @@ namespace utils {
             _th->Scale(1./nprim);
 
             _th->SetDirectory(nullptr);
-            return _th;
+            return _th; // expect compiler to copy-elide here
         }
         else if (obj->InheritsFrom(TF1::Class())) {
-            auto _th = new TH1D(obj->GetName(), obj->GetTitle(), nbinsx, xmin, xmax);
+            std::unique_ptr<TH1> _th(new TH1D(obj->GetName(), obj->GetTitle(), nbinsx, xmin, xmax));
             for (int b = 1; b < _th->GetNbinsX(); ++b) {
                 _th->SetBinContent(b, dynamic_cast<TF1*>(obj)->Eval(_th->GetBinCenter(b)));
             }
-            _th->SetDirectory(nullptr);
-            return _th;
+            _th->SetDirectory(nullptr); // just to be sure
+            return _th; // expect compiler to copy-elide here
         }
         else {
             throw std::runtime_error("object '" + objectname + "' in file " + filename + " isn't of type TH1 or TF1");
@@ -152,7 +147,7 @@ namespace utils {
                 std::string true_iso = i;
                 if (i.find('-') != std::string::npos) true_iso = i.substr(0, i.find('-'));
 
-                TH1* sum = nullptr;
+                std::vector<std::unique_ptr<TH1>> collection;
                 if (it["part"].is_object()) {
                     hist_name = it.value("hist-name", hist_name);
 
@@ -173,18 +168,13 @@ namespace utils {
                         logging::out(logging::debug) << "summing object '" << hist_name << " with weight "
                                                      << p.value().get<double>()/sumw << std::endl;
                         // get histogram (owned by us)
-                        auto thh = utils::get_component(filename, hist_name, 8000, 0, 8000);
-                        // add it with weight
-                        if (!sum) {
-                            sum = thh;
-                            sum->Scale(p.value().get<double>()/sumw);
-                        }
-                        else {
-                            sum->Add(thh, p.value().get<double>()/sumw);
-                            delete thh;
-                        }
+                        collection.emplace_back(utils::get_component(filename, hist_name, 8000, 0, 8000));
+                        // apply weight
+                        collection.back()->Scale(p.value().get<double>()/sumw);
                     }
-                    return sum;
+                    // now sum them all
+                    for (auto it = collection.begin()+1; it != collection.end(); it++) collection[0]->Add(it->get());
+                    return std::move(collection[0]);
                 }
                 else if (it["part"].is_string()) {
                     // get volume name
@@ -216,42 +206,42 @@ namespace utils {
                     th->SetName((iso.key() + "_" + std::string(th->GetName())).c_str());
 
                     // comp_map now owns the histogram
-                    comp_map.emplace_back(iso.key(), th, iso.value()["amount-cts"].get<float>());
+                    comp_map.emplace_back(iso.key(), th.release(), iso.value()["amount-cts"].get<float>());
                 }
                 else { // look into gerda-pdfs database
-                    TH1* comp = nullptr;
                     if (iso.value()["isotope"].is_string()) {
-                        comp = sum_parts(iso.value()["isotope"]);
+                        comp_map.emplace_back(
+                            iso.key(),
+                            sum_parts(iso.value()["isotope"]).release(),
+                            iso.value()["amount-cts"].get<float>()
+                        );
                     }
                     else if (iso.value()["isotope"].is_object()) {
+                        std::vector<std::unique_ptr<TH1>> collection;
                         double sumwi = 0;
                         for (auto& i : iso.value()["isotope"].items()) sumwi += i.value().get<double>();
 
                         for (auto& i : iso.value()["isotope"].items()) {
                             logging::out(logging::debug) << "scaling pdf for " << i.key() << " by a factor "
                                                          << i.value().get<double>()/sumwi << std::endl;
-                            if (!comp) {
-                                comp = sum_parts(i.key());
-                                comp->Scale(i.value().get<double>()/sumwi);
-                            }
-                            else {
-                                auto _tmp = sum_parts(i.key());
-                                comp->Add(_tmp, i.value().get<double>()/sumwi);
-                                delete _tmp;
-                            }
 
+                            collection.emplace_back(sum_parts(i.key()));
+                            collection.back()->Scale(i.value().get<double>()/sumwi);
                         }
+                        // now sum them all
+                        for (auto it = collection.begin()+1; it != collection.end(); it++) collection[0]->Add(it->get());
+                        comp_map.emplace_back(iso.key(), collection[0].release(), iso.value()["amount-cts"].get<float>());
                     }
                     else throw std::runtime_error("unexpected entry " + iso.value()["isotope"].dump()
                             + "found in [\"components\"][\"" + iso.key() + "\"][\"isotope\"]");
 
-                    // comp_map now owns the histogram
-                    comp->SetName((iso.key() + "_" + std::string(comp->GetName())).c_str());
-                    comp_map.emplace_back(iso.key(), comp, iso.value()["amount-cts"].get<float>());
+                    comp_map.back().hist->SetName(
+                        (iso.key() + "_" + std::string(comp_map.back().hist->GetName())).c_str()
+                    );
+
                 }
             }
         }
-
         return comp_map;
     }
 }

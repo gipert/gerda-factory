@@ -12,10 +12,6 @@ GerdaFactory::GerdaFactory() :
     _range(0, 0) {
 }
 
-GerdaFactory::~GerdaFactory() {
-    this->ResetComponents();
-}
-
 void GerdaFactory::SetCountsRange(float xmin, float xmax) {
     if (!(xmin == 0 and xmax == 0) and xmax < xmin) throw std::runtime_error("GerdaFactory::SetCountsRange] invalid range.");
     _range.first = xmin;
@@ -27,16 +23,17 @@ void GerdaFactory::AddComponent(const TH1* hist, const float counts) {
     if (!hist) throw std::runtime_error("GerdaFactory::AddComponent] invalid pointer detected.");
     if (counts < 0) throw std::runtime_error("GerdaFactory::AddComponent] counts argument is < 0.");
 
-    // clone
-    auto htmp = dynamic_cast<TH1*>(
-        hist->Clone(("comp_" + std::to_string(_comp_list.size())).c_str())
-    );
+    // insert clone
+    std::unique_ptr<TH1> _tmp(dynamic_cast<TH1*>(hist->Clone(("comp_" + std::to_string(_comp_list.size())).c_str())));
+    auto position = _comp_list.emplace(std::move(_tmp), counts);
 
     // precaution, detach from any TDirectory
-    htmp->SetDirectory(nullptr);
+    position.first->first->SetDirectory(nullptr);
+}
 
-    // insert
-    _comp_list.emplace(htmp, counts);
+// creates an internal copy of the histogram pointer
+void GerdaFactory::AddComponent(const std::unique_ptr<TH1>& hist, const float counts) {
+    this->AddComponent(hist.get(), counts);
 }
 
 void GerdaFactory::FillPseudoExp(TH1& out) {
@@ -44,7 +41,7 @@ void GerdaFactory::FillPseudoExp(TH1& out) {
     if (_comp_list.empty()) throw std::runtime_error("GerdaFactory::GetPseudoExp] must call GerdaFactory::AddComponent first.");
 
     // loop over components in list
-    for (auto comp : _comp_list) {
+    for (auto& comp : _comp_list) {
         // determine experiment actualization
         int real_cts;
         if (_range.first == 0 and _range.second == 0) real_cts = _rndgen.Poisson(comp.second);
@@ -62,7 +59,7 @@ void GerdaFactory::FillPseudoExp(TH1* out) {
     if (_comp_list.empty()) throw std::runtime_error("GerdaFactory::GetPseudoExp] must call GerdaFactory::AddComponent first.");
 
     // loop over components in list
-    for (auto comp : _comp_list) {
+    for (auto& comp : _comp_list) {
         // determine experiment actualization
         int real_cts;
         if (_range.first == 0 and _range.second == 0) real_cts = _rndgen.Poisson(comp.second);
@@ -76,6 +73,5 @@ void GerdaFactory::FillPseudoExp(TH1* out) {
 }
 
 void GerdaFactory::ResetComponents() {
-    for (auto& e : _comp_list) delete e.first;
     _comp_list.clear();
 }

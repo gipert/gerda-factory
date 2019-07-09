@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     logs::out(logs::detail) << "getting base component list from JSON config" << std::endl;
     auto comp_list = utils::get_components_json(config);
     // save it (deep copy), we'll need it after resetting the factory before the next iterations
-    const auto comp_list_save = comp_list;
+    const auto comp_list_save = utils::deep_copy(comp_list);
 
     if (!config["pdf-distortions"].is_object()) {
         throw std::runtime_error("could not find 'pdf-distortions' field in the config file");
@@ -90,11 +90,7 @@ int main(int argc, char** argv) {
     auto dist_prefix = config["pdf-distortions"].value("prefix", ".") + "/";
     TRandom3 rndgen(0);
 
-    // output file
-    logs::out(logs::debug) << "opening output file" << std::endl;
     auto outname = utils::get_file_obj(config["output"]["file"].get<std::string>());
-    system(("mkdir -p " + outname.first.substr(0, outname.first.find_last_of('/'))).c_str());
-    TFile fout(outname.first.c_str(), "recreate");
 
     auto niter = config.value("number-of-experiments", 100);
     logs::out(logs::info) << "generating " << niter << " experiments..." << std::endl;
@@ -102,7 +98,7 @@ int main(int argc, char** argv) {
         // reset components
         factory.ResetComponents();
         comp_list.clear();
-        comp_list = comp_list_save;
+        comp_list = utils::deep_copy(comp_list_save);
 
         bool done_something = false;
         // for distortions given with gerda-pdfs structure
@@ -118,18 +114,18 @@ int main(int argc, char** argv) {
                                             << it.value()[choice].get<std::string>() << "'" << std::endl;
                     // get histograms
                     auto dist_list = utils::get_components_json(config, dist_prefix + it.value()[choice].get<std::string>());
-                    for (auto& d : dist_list) {
+                    for (auto itt = dist_list.begin(); itt != dist_list.end(); itt++) {
                         // see if we have a corresponding fit component
                         auto result = std::find_if(
                             comp_list.begin(), comp_list.end(),
-                            [&d](utils::bkg_comp& a) { return a.name == d.name; }
+                            [&itt](utils::bkg_comp& a) { return a.name == itt->name; }
                         );
 
                         // distort
                         if (result != comp_list.end()) {
-                            logs::out(logs::debug) << "successfully found corresponding fit component '" << d.name
+                            logs::out(logs::debug) << "successfully found corresponding fit component '" << itt->name
                                                    << "', distorting" << std::endl;
-                            result->hist->Multiply(d.hist);
+                            result->hist->Multiply(itt->hist.get());
                             done_something = true;
                         }
                         else {
@@ -174,7 +170,7 @@ int main(int argc, char** argv) {
                                 8000, 0, 8000
                             );
                             logs::out(logs::debug) << "distorting" << std::endl;
-                            result->hist->Multiply(hdist);
+                            result->hist->Multiply(hdist.get());
                             done_something = true;
                         }
                         else {
@@ -197,7 +193,7 @@ int main(int argc, char** argv) {
         if (!done_something) logs::out(logs::warning) << "did not distort anything!" << std::endl;
 
         // add components to the factory
-        for (auto& e : comp_list) factory.AddComponent(e.hist, e.counts);
+        for (auto& e : comp_list) factory.AddComponent(e.hist.get(), e.counts);
 
         // now generate the experiment
         logs::out(logs::detail) << "filling output histogram" << std::endl;
@@ -209,6 +205,11 @@ int main(int argc, char** argv) {
             config["output"].value("xaxis-range", std::vector<int>{0, 8000})[1]
         );
         factory.FillPseudoExp(hexp);
+
+        // output file
+        logs::out(logs::debug) << "opening output file" << std::endl;
+        system(("mkdir -p " + outname.first.substr(0, outname.first.find_last_of('/'))).c_str());
+        TFile fout(outname.first.c_str(), "recreate");
 
         fout.cd();
         hexp.Write();
