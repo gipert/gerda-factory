@@ -74,16 +74,14 @@ void ROOTroutine(const std::string& filelist) {
             }
             if (obj->InheritsFrom(TH1::Class())) {
                 auto horig = dynamic_cast<TH1*>(obj);
-                horig->SetName((n + "_orig").c_str());
                 auto hdist = dynamic_cast<TH1*>(fdist.Get(n.c_str()));
                 if (!hdist) {
-                    std::cerr << "could not find object " << n << " in "
-                              << "gerda-pdfs/gerda-pdfs-best/" + basepath << std::endl;
+                    std::cerr << "could not find object " << n << " in " << file << std::endl;
                     continue;
                 }
-                horig->Divide(hdist);
+                hdist->Divide(horig);
                 fout.cd();
-                horig->Write(n.c_str());
+                hdist->Write(n.c_str());
             }
             // for alphas, do not calculate distortion
             else if (obj->InheritsFrom(TF1::Class())) {

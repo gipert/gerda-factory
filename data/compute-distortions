@@ -33,47 +33,39 @@ for f in `find gerda-pdfs/distorted -name '*.tar.xz'`; do
 done
 
 ./take_ratio.C \
-    gerda-pdfs/gerda-pdfs-best/ge_holders/plates/Ac228/pdf-ge_holders-plates-Ac228-lar.root \
     gerda-pdfs/gerda-pdfs-best/larveto/fibers/Ac228/pdf-larveto-fibers-Ac228-lar.root \
+    gerda-pdfs/gerda-pdfs-best/ge_holders/plates/Ac228/pdf-ge_holders-plates-Ac228-lar.root \
     M1_enrBEGe M1_enrCoax \
     distortions/pdf-Ac228-holders_vs_fibers-lar.root
 
 ./take_ratio.C \
-    gerda-pdfs/gerda-pdfs-best/electronics/cc3/K40/pdf-electronics-cc3-K40-lar.root \
     gerda-pdfs/gerda-pdfs-best/larveto/copper_shroud/K40/pdf-larveto-copper_shroud-K40-lar.root \
+    gerda-pdfs/gerda-pdfs-best/electronics/cc3/K40/pdf-electronics-cc3-K40-lar.root \
     M1_enrBEGe M1_enrCoax \
     distortions/pdf-K40_far-cc3_vs_copper_shroud-lar.root
 
 ./take_ratio.C \
-    gerda-pdfs/gerda-pdfs-best/gedet/nplus_bege/K42/pdf-gedet-nplus_bege-K42-lar.root \
     gerda-pdfs/gerda-pdfs-best/gedet/pplus_bege/K42/pdf-gedet-pplus_bege-K42-lar.root \
+    gerda-pdfs/gerda-pdfs-best/gedet/nplus_bege/K42/pdf-gedet-nplus_bege-K42-lar.root \
     M1_enrBEGe M1_enrCoax \
     distortions/pdf-K42_close-nplus_bege_vs_pplus_bege-lar.root
 
 ./take_ratio.C \
-    gerda-pdfs/gerda-pdfs-best/lar/sur_array/K42/pdf-lar-sur_array-K42-lar.root \
     gerda-pdfs/gerda-pdfs-best/lar/above_array/K42/pdf-lar-above_array-K42-lar.root \
+    gerda-pdfs/gerda-pdfs-best/lar/sur_array/K42/pdf-lar-sur_array-K42-lar.root \
     M1_enrBEGe M1_enrCoax \
     distortions/pdf-K42_far-sur_array_vs_above_array-lar.root
 
 ./take_ratio.C \
-    gerda-pdfs/gerda-pdfs-best/minishroud/ms_all/K40/pdf-minishroud-ms_all-K40-lar.root \
     gerda-pdfs/gerda-pdfs-best/cables/cables_all/K40/pdf-cables-cables_all-K40-lar.root \
+    gerda-pdfs/gerda-pdfs-best/minishroud/ms_all/K40/pdf-minishroud-ms_all-K40-lar.root \
     M1_enrBEGe M1_enrCoax \
     distortions/pdf-K40_close-minishroud_vs_cables-lar.root
 
 ./take_ratio.C \
-    gerda-pdfs/gerda-pdfs-best/minishroud/ms_all/K40/pdf-minishroud-ms_all-K40-lar.root \
     gerda-pdfs/gerda-pdfs-best/ge_holders/plates/K40/pdf-ge_holders-plates-K40-lar.root \
+    gerda-pdfs/gerda-pdfs-best/minishroud/ms_all/K40/pdf-minishroud-ms_all-K40-lar.root \
     M1_enrBEGe M1_enrCoax \
     distortions/pdf-K40_close-minishroud_vs_holders-lar.root
-
-for iso in Bi212 Tl208; do
-    ./take_ratio.C \
-        gerda-pdfs/gerda-pdfs-best/cables/cables_all/$iso/pdf-cables-cables_all-$iso-lar.root \
-        gerda-pdfs/gerda-pdfs-best/larveto/fibers/$iso/pdf-larveto-fibers-$iso-lar.root \
-        M1_enrBEGe M1_enrCoax \
-        distortions/pdf-$iso-cables_vs_fibers-lar.root
-done
 
 ./Bi212Tl208_distortion.C
