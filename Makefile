@@ -16,7 +16,7 @@ bin/gerda-fake-gen : src/gerda-fake-gen.cc src/GerdaFactory.cc src/GerdaFactory.
 	$(CXX) $(CXXFLAGS) -o $@ $< src/GerdaFactory.cc $(LIBS)
 
 bin/gerda-factory : src/gerda-factory.cc src/GerdaFactory.cc src/GerdaFactory.h src/utils.hpp
-	$(CXX) $(CXXFLAGS) -o $@ $< src/GerdaFactory.cc $(LIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $< src/GerdaFactory.cc src/progressbar/ProgressBar.cc $(LIBS)
 
 clean :
 	-rm -r bin

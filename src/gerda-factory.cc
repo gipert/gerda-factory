@@ -9,7 +9,9 @@
 #include <getopt.h>
 
 #include "TRandom3.h"
+#include "TObjArray.h"
 #include "utils.hpp"
+#include "progressbar/ProgressBar.h"
 namespace logs = utils::logging;
 
 #include "GerdaFactory.h"
@@ -92,9 +94,16 @@ int main(int argc, char** argv) {
 
     auto outname = utils::get_file_obj(config["output"]["file"].get<std::string>());
 
+    // container for output histograms
+    TObjArray experiments;
+    experiments.SetOwner(true);
+
     auto niter = config.value("number-of-experiments", 100);
-    logs::out(logs::info) << "generating " << niter << " experiments..." << std::endl;
+    ProgressBar bar(niter);
+    logs::out(logs::info) << "generating " << niter << " experiments ";
+    logs::out(logs::detail) << std::endl;
     for (int i = 0; i < niter; ++i) {
+        if (logs::min_level > logs::detail) bar.Update();
         // reset components
         factory.ResetComponents();
         comp_list.clear();
@@ -197,7 +206,7 @@ int main(int argc, char** argv) {
 
         // now generate the experiment
         logs::out(logs::detail) << "filling output histogram" << std::endl;
-        TH1D hexp(
+        auto hexp = new TH1D(
             ((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str(),
             "Pseudo experiment",
             config["output"].value("number-of-bins", 8000),
@@ -206,17 +215,17 @@ int main(int argc, char** argv) {
         );
         factory.FillPseudoExp(hexp);
 
-        // output file
-        logs::out(logs::debug) << "opening output file" << std::endl;
-        system(("mkdir -p " + outname.first.substr(0, outname.first.find_last_of('/'))).c_str());
-        TFile fout(outname.first.c_str(), "recreate");
-
-        fout.cd();
-        hexp.Write();
-
-        logs::out(logs::debug) << "object " << hexp.GetName()
-                               << " written on file " << outname.first << std::endl;
+        experiments.Add(hexp);
+        logs::out(logs::debug) << "object " << hexp->GetName()
+                               << " added to collection " << std::endl;
     }
+
+    // output file
+    logs::out(logs::debug) << "opening output file" << std::endl;
+    system(("mkdir -p " + outname.first.substr(0, outname.first.find_last_of('/'))).c_str());
+    TFile fout(outname.first.c_str(), "recreate");
+    experiments.Write("experiments", TObject::kSingleKey);
+
     logs::out(logs::debug) << "exiting" << std::endl;
 
     return 0;
