@@ -11,7 +11,7 @@
 #include "TRandom3.h"
 #include "TObjArray.h"
 #include "utils.hpp"
-#include "progressbar/ProgressBar.h"
+#include "progressbar.hpp"
 namespace logs = utils::logging;
 
 #include "GerdaFactory.h"
@@ -99,11 +99,15 @@ int main(int argc, char** argv) {
     experiments.SetOwner(true);
 
     auto niter = config.value("number-of-experiments", 100);
-    ProgressBar bar(niter);
+    progressbar bar(niter);
+    bar.set_todo_char(" ");
+    bar.set_done_char("█");
+    bar.set_opening_bracket_char("");
+    bar.set_closing_bracket_char("");
     logs::out(logs::info) << "generating " << niter << " experiments ";
     logs::out(logs::detail) << std::endl;
     for (int i = 0; i < niter; ++i) {
-        if (logs::min_level > logs::detail) bar.Update();
+        if (logs::min_level > logs::detail) bar.update();
         // reset components
         factory.ResetComponents();
         comp_list.clear();

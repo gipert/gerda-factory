@@ -58,9 +58,9 @@ void ROOTroutine(const std::string& filelist) {
         outname = "distortions/" + dirname + "/" + basepath;
 
         TFile fdist(file.c_str());
-        TFile forig(("gerda-pdfs/gerda-pdfs-best/" + basepath).c_str());
+        TFile forig(("gerda-pdfs/gerda-pdfs-2nufit-best/" + basepath).c_str());
         if (!forig.IsOpen()) {
-            std::cerr << "WARNING: could not find " << "gerda-pdfs/gerda-pdfs-best/"
+            std::cerr << "WARNING: could not find " << "gerda-pdfs/gerda-pdfs-2nufit-best/"
                       << basepath << std::endl;
             continue;
         }

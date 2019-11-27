@@ -6,12 +6,12 @@
         "xaxis-range" : [0, 8000]
     },
     "range-for-counts" : [565, 2000],
-    "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-best",
+    "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-2nufit-best",
     "number-of-experiments" : 100,
     "hist-name" : "M1_enrBEGe",
     "components" : [
         {
-            "root-file" : "../data/gerda-pdfs/gerda-pdfs-best/alphas/analytic/pdf-functions.root",
+            "root-file" : "../data/gerda-pdfs/gerda-pdfs-2nufit-best/alphas/analytic/pdf-functions.root",
             "components" : {
                 "alpha-slope" : {
                     "hist-name" : "ramp",
@@ -99,10 +99,10 @@
         "prefix" : "../data/distortions",
         "global" : {
             "LAr-veto-model" : [
-                "gerda-pdfs-2nufit-larmodel-manual-x0_5",
-                "gerda-pdfs-2nufit-larmodel-manual-x2_0",
-                "gerda-pdfs-2nufit-larmodel-manual-f0_5",
-                "gerda-pdfs-2nufit-larmodel-manual-f2_0"
+                "gerda-pdfs-2nufit-larmodel-manual-n0_50",
+                "gerda-pdfs-2nufit-larmodel-manual-n2_00",
+                "gerda-pdfs-2nufit-larmodel-manual-x0_90",
+                "gerda-pdfs-2nufit-larmodel-manual-x1_10"
             ],
             "transition-layer" : [
                 "gerda-pdfs-2nufit-tlayer-zerodl",
