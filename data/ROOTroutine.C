@@ -12,50 +12,27 @@ void ROOTroutine(const std::string& filelist) {
     for (const auto& file : files) {
         auto f = file;
 
-        std::string basepath, outname, dirname;
-        std::vector<std::string> histnames;
-        if (file.find("alphas") == std::string::npos) {
-            auto fname = f.substr(f.find_last_of('/')+1, f.size());
-            f.erase(f.find_last_of('/'), f.size());
+        auto fname = f.substr(f.find_last_of('/')+1, f.size());
+        f.erase(f.find_last_of('/'), f.size());
 
-            auto isotope = f.substr(f.find_last_of('/')+1, f.size());
-            f.erase(f.find_last_of('/'), f.size());
+        auto isotope = f.substr(f.find_last_of('/')+1, f.size());
+        f.erase(f.find_last_of('/'), f.size());
 
-            auto part = f.substr(f.find_last_of('/')+1, f.size());
-            f.erase(f.find_last_of('/'), f.size());
+        auto part = f.substr(f.find_last_of('/')+1, f.size());
+        f.erase(f.find_last_of('/'), f.size());
 
-            auto volume = f.substr(f.find_last_of('/')+1, f.size());
-            f.erase(f.find_last_of('/'), f.size());
+        auto volume = f.substr(f.find_last_of('/')+1, f.size());
+        f.erase(f.find_last_of('/'), f.size());
 
-            dirname = f.substr(f.find_last_of('/')+1, f.size());
-            f.erase(f.find_last_of('/'), f.size());
+        auto dirname = f.substr(f.find_last_of('/')+1, f.size());
+        f.erase(f.find_last_of('/'), f.size());
 
-            basepath = volume + "/" + part + "/" + isotope + "/" + fname;
-            system(("mkdir -p distortions/" + dirname + "/" + volume + "/" + part + "/" + isotope).c_str());
+        auto basepath = volume + "/" + part + "/" + isotope + "/" + fname;
+        system(("mkdir -p distortions/" + dirname + "/" + volume + "/" + part + "/" + isotope).c_str());
 
-            histnames = {"M1_enrBEGe", "M1_enrCoax"};
-        }
-        // hack for alphas
-        else {
-            auto fname = f.substr(f.find_last_of('/')+1, f.size());
-            f.erase(f.find_last_of('/'), f.size());
+        std::vector<std::string> histnames = {"lar/M1_enrBEGe", "lar/M1_enrCoax"};
 
-            auto category = f.substr(f.find_last_of('/')+1, f.size());
-            f.erase(f.find_last_of('/'), f.size());
-
-            auto volume = f.substr(f.find_last_of('/')+1, f.size());
-            f.erase(f.find_last_of('/'), f.size());
-
-            dirname = f.substr(f.find_last_of('/')+1, f.size());
-            f.erase(f.find_last_of('/'), f.size());
-
-            basepath = volume + "/" + category + "/" + fname;
-            system(("mkdir -p distortions/" + dirname + "/" + volume + "/" + category).c_str());
-
-            histnames = {"ramp", "flat"};
-        }
-
-        outname = "distortions/" + dirname + "/" + basepath;
+        auto outname = "distortions/" + dirname + "/" + basepath;
 
         TFile fdist(file.c_str());
         TFile forig(("gerda-pdfs/gerda-pdfs-2nufit-best/" + basepath).c_str());
@@ -81,6 +58,11 @@ void ROOTroutine(const std::string& filelist) {
                 }
                 hdist->Divide(horig);
                 fout.cd();
+                if (n == histnames[0]) {
+                    auto dir = fout.mkdir((n.substr(0, n.find_last_of('/'))).c_str());
+                }
+                fout.cd((n.substr(0, n.find_last_of('/'))).c_str());
+                n.erase(0, n.find_last_of('/')+1);
                 hdist->Write(n.c_str());
             }
             // for alphas, do not calculate distortion

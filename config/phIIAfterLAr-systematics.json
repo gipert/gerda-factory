@@ -8,10 +8,10 @@
     "range-for-counts" : [565, 2000],
     "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-2nufit-best",
     "number-of-experiments" : 100,
-    "hist-name" : "M1_enrBEGe",
+    "hist-name" : "lar/M1_enrBEGe",
     "components" : [
         {
-            "root-file" : "../data/gerda-pdfs/gerda-pdfs-2nufit-best/alphas/analytic/pdf-functions.root",
+            "root-file" : "../data/gerda-pdfs/pdf-functions.root",
             "components" : {
                 "alpha-slope" : {
                     "hist-name" : "ramp",
@@ -27,33 +27,33 @@
             "part": "cables/cables_all",
             "components" : {
                 "Bi212-Tl208" : {
-                    "isotope" : { "Tl208-lar" : 0.3539, "Bi212-lar" : 1 },
+                    "isotope" : { "Tl208" : 0.3539, "Bi212" : 1 },
                     "amount-cts" : 36
                 },
                 "Pb214-Bi214" : {
-                    "isotope" : { "Bi214-lar" : 1, "Pb214-lar" : 1 },
+                    "isotope" : { "Bi214" : 1, "Pb214" : 1 },
                     "amount-cts" : 79
                 },
                 "Co60" : {
-                    "isotope" : "Co60-lar",
+                    "isotope" : "Co60",
                     "amount-cts" : 25
                 }
             }
-    },
+        },
         {
             "part": "gedet/intrinsic_bege",
             "components" : {
                 "2nbb" : {
-                    "isotope" : "2nbb-lar",
+                    "isotope" : "2nbb",
                     "amount-cts" : 45635
                 }
             }
         },
         {
-            "part": "ge_holders/plates",
+            "part": "ge_holders/ge_holders_all",
             "components" : {
                 "Ac228" : {
-                    "isotope" : "Ac228-lar",
+                    "isotope" : "Ac228",
                     "amount-cts" : 113
                 }
             }
@@ -62,7 +62,7 @@
             "part": "minishroud/ms_all",
             "components" : {
                 "K40-close" : {
-                    "isotope" : "K40-lar",
+                    "isotope" : "K40",
                     "amount-cts" : 1583
                 }
             }
@@ -71,7 +71,7 @@
             "part": "electronics/cc3",
             "components" : {
                 "K40-far" : {
-                    "isotope" : "K40-lar",
+                    "isotope" : "K40",
                     "amount-cts" : 953
                 }
             }
@@ -80,7 +80,7 @@
             "part": "lar/sur_array",
             "components" : {
                 "K42-far" : {
-                    "isotope" : "K42-lar",
+                    "isotope" : "K42",
                     "amount-cts" : 1313
                 }
             }
@@ -89,7 +89,7 @@
             "part": "gedet/nplus_bege",
             "components" : {
                 "K42-close" : {
-                    "isotope" : "K42-lar",
+                    "isotope" : "K42",
                     "amount-cts" : 316
                 }
             }
@@ -99,25 +99,35 @@
         "prefix" : "../data/distortions",
         "global" : {
             "LAr-veto-model" : [
-                "gerda-pdfs-2nufit-larmodel-manual-n0_50",
-                "gerda-pdfs-2nufit-larmodel-manual-n2_00",
-                "gerda-pdfs-2nufit-larmodel-manual-x0_90",
-                "gerda-pdfs-2nufit-larmodel-manual-x1_10"
+                "gerda-pdfs-2nufit-larmodel-d0p55",
+                "gerda-pdfs-2nufit-larmodel-d0p65",
+                "gerda-pdfs-2nufit-larmodel-d0p75",
+                "gerda-pdfs-2nufit-larmodel-d0p85",
+                "gerda-pdfs-2nufit-larmodel-d0p95",
+                "gerda-pdfs-2nufit-larmodel-d1p05",
+                "gerda-pdfs-2nufit-larmodel-d1p15",
+                "gerda-pdfs-2nufit-larmodel-d1p25",
+                "gerda-pdfs-2nufit-larmodel-d1p35",
+                "gerda-pdfs-2nufit-larmodel-d1p45"
             ],
             "transition-layer" : [
-                "gerda-pdfs-2nufit-tlayer-zerodl",
-                "gerda-pdfs-2nufit-tlayer-zerotl"
+                "gerda-pdfs-2nufit-tlayer-m1sigma",
+                "gerda-pdfs-2nufit-tlayer-m2sigma",
+                "gerda-pdfs-2nufit-tlayer-m5sigma",
+                "gerda-pdfs-2nufit-tlayer-p1sigma",
+                "gerda-pdfs-2nufit-tlayer-p2sigma",
+                "gerda-pdfs-2nufit-tlayer-p5sigma"
             ]
         },
         "specific" : {
-            "Ac228"       : [ "pdf-Ac228-holders_vs_fibers-lar.root" ],
-            "K40-far"     : [ "pdf-K40_far-cc3_vs_copper_shroud-lar.root" ],
-            "K42-close"   : [ "pdf-K42_close-nplus_bege_vs_pplus_bege-lar.root" ],
-            "K42-far"     : [ "pdf-K42_far-sur_array_vs_above_array-lar.root" ],
-            "Bi212-Tl208" : [ "pdf-Bi212_Tl208-cables_vs_fibers-lar.root" ],
+            "Ac228"       : [ "pdf-Ac228-holders_vs_fibers.root" ],
+            "K40-far"     : [ "pdf-K40_far-cc3_vs_copper_shroud.root" ],
+            "K42-close"   : [ "pdf-K42_close-nplus_bege_vs_pplus_bege.root" ],
+            "K42-far"     : [ "pdf-K42_far-sur_array_vs_above_array.root" ],
+            "Bi212-Tl208" : [ "pdf-Bi212_Tl208-cables_vs_fibers.root" ],
             "K40-close"   : [
-                "pdf-K40_close-minishroud_vs_cables-lar.root",
-                "pdf-K40_close-minishroud_vs_holders-lar.root"
+                "pdf-K40_close-minishroud_vs_cables.root",
+                "pdf-K40_close-minishroud_vs_holders.root"
             ]
         }
     }
