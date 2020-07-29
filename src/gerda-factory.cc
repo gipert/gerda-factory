@@ -95,8 +95,7 @@ int main(int argc, char** argv) {
     auto outname = utils::get_file_obj(config["output"]["file"].get<std::string>());
 
     // container for output histograms
-    TObjArray experiments;
-    experiments.SetOwner(true);
+    std::vector<TH1D*> experiments;
 
     auto niter = config.value("number-of-experiments", 100);
     progressbar bar(niter);
@@ -219,7 +218,7 @@ int main(int argc, char** argv) {
         );
         factory.FillPseudoExp(hexp);
 
-        experiments.Add(hexp);
+        experiments.push_back(hexp);
         logs::out(logs::debug) << "object " << hexp->GetName()
                                << " added to collection " << std::endl;
     }
@@ -228,7 +227,8 @@ int main(int argc, char** argv) {
     logs::out(logs::debug) << "opening output file" << std::endl;
     system(("mkdir -p " + outname.first.substr(0, outname.first.find_last_of('/'))).c_str());
     TFile fout(outname.first.c_str(), "recreate");
-    experiments.Write("experiments", TObject::kSingleKey);
+    for (auto e : experiments) e->Write();
+    fout.Close();
 
     logs::out(logs::debug) << "exiting" << std::endl;
 
