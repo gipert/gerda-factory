@@ -1,5 +1,5 @@
 {
-    "logging" : "info",
+    "logging" : "debug",
     "output" : {
         "file" : "../results/phIIAfterLAr-exp-pool.root",
         "number-of-bins" : 8000,
@@ -98,37 +98,44 @@
     "pdf-distortions" : {
         "prefix" : "../data/distortions",
         "global" : {
-            "LAr-veto-model" : [
-                "gerda-pdfs-2nufit-larmodel-d0p55",
-                "gerda-pdfs-2nufit-larmodel-d0p65",
-                "gerda-pdfs-2nufit-larmodel-d0p75",
-                "gerda-pdfs-2nufit-larmodel-d0p85",
-                "gerda-pdfs-2nufit-larmodel-d0p95",
-                "gerda-pdfs-2nufit-larmodel-d1p05",
-                "gerda-pdfs-2nufit-larmodel-d1p15",
-                "gerda-pdfs-2nufit-larmodel-d1p25",
-                "gerda-pdfs-2nufit-larmodel-d1p35",
-                "gerda-pdfs-2nufit-larmodel-d1p45"
-            ],
-            "transition-layer" : [
-                "gerda-pdfs-2nufit-tlayer-m1sigma",
-                "gerda-pdfs-2nufit-tlayer-m2sigma",
-                "gerda-pdfs-2nufit-tlayer-m5sigma",
-                "gerda-pdfs-2nufit-tlayer-p1sigma",
-                "gerda-pdfs-2nufit-tlayer-p2sigma",
-                "gerda-pdfs-2nufit-tlayer-p5sigma"
-            ]
+            "LAr-veto-model" : {
+                "pdfs" : [
+                    "gerda-pdfs-2nufit-larmodel-d0p50",
+                    "gerda-pdfs-2nufit-larmodel-d0p60",
+                    "gerda-pdfs-2nufit-larmodel-d0p70",
+                    "gerda-pdfs-2nufit-larmodel-d0p80",
+                    "gerda-pdfs-2nufit-larmodel-d0p90",
+                    "gerda-pdfs-2nufit-larmodel-d1p10",
+                    "gerda-pdfs-2nufit-larmodel-d1p20",
+                    "gerda-pdfs-2nufit-larmodel-d1p30",
+                    "gerda-pdfs-2nufit-larmodel-d1p40",
+                    "gerda-pdfs-2nufit-larmodel-d1p50"
+                ]
+            },
+            "transition-layer" : {
+                "pdfs" : [
+                    "gerda-pdfs-2nufit-tlayer-m1sigma",
+                    "gerda-pdfs-2nufit-tlayer-m2sigma",
+                    "gerda-pdfs-2nufit-tlayer-m5sigma",
+                    "gerda-pdfs-2nufit-tlayer-p1sigma",
+                    "gerda-pdfs-2nufit-tlayer-p2sigma",
+                    "gerda-pdfs-2nufit-tlayer-p5sigma"
+                ]
+            }
         },
         "specific" : {
-            "Ac228"       : [ "pdf-Ac228-holders_vs_fibers.root" ],
-            "K40-far"     : [ "pdf-K40_far-cc3_vs_copper_shroud.root" ],
-            "K42-close"   : [ "pdf-K42_close-nplus_bege_vs_pplus_bege.root" ],
-            "K42-far"     : [ "pdf-K42_far-sur_array_vs_above_array.root" ],
-            "Bi212-Tl208" : [ "pdf-Bi212_Tl208-cables_vs_fibers.root" ],
-            "K40-close"   : [
-                "pdf-K40_close-minishroud_vs_cables.root",
-                "pdf-K40_close-minishroud_vs_holders.root"
-            ]
+            "Ac228"       : { "pdfs" : [ "pdf-Ac228-holders_vs_fibers.root" ] },
+            "K40-far"     : { "pdfs" : [ "pdf-K40_far-cc3_vs_copper_shroud.root" ] },
+            "K42-close"   : { "pdfs" : [ "pdf-K42_close-nplus_bege_vs_pplus_bege.root" ] },
+            "K42-far"     : { "pdfs" : [ "pdf-K42_far-sur_array_vs_above_array.root" ] },
+            "Bi212-Tl208" : { "pdfs" : [ "pdf-Bi212_Tl208-cables_vs_fibers.root" ] },
+            "K40-close"   : {
+                "interpolate" : true,
+                "pdfs" : [
+                    "pdf-K40_close-minishroud_vs_cables.root",
+                    "pdf-K40_close-minishroud_vs_holders.root"
+                ]
+            }
         }
     }
 }
