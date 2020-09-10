@@ -39,22 +39,22 @@ done
     distortions/pdf-Ac228-holders_vs_fibers.root
 
 ./take_ratio.C \
-    gerda-pdfs/gerda-pdfs-2nufit-best/larveto/copper_shroud/K40/pdf-larveto-copper_shroud-K40.root \
-    gerda-pdfs/gerda-pdfs-2nufit-best/electronics/cc3/K40/pdf-electronics-cc3-K40.root \
+    gerda-pdfs/gerda-pdfs-2nufit-best/gedet/pplus_bege/K42/pdf-gedet-pplus_bege-K42.root \
+    gerda-pdfs/gerda-pdfs-2nufit-best/lar/inside_ms/K42/pdf-lar-inside_ms-K42.root \
     lar/M1_enrBEGe lar/M1_enrCoax \
-    distortions/pdf-K40_far-cc3_vs_copper_shroud.root
+    distortions/pdf-K42_close-inside_ms_vs_pplus_bege.root
 
 ./take_ratio.C \
-    gerda-pdfs/gerda-pdfs-2nufit-best/gedet/pplus_bege/K42/pdf-gedet-pplus_bege-K42.root \
     gerda-pdfs/gerda-pdfs-2nufit-best/gedet/nplus_bege/K42/pdf-gedet-nplus_bege-K42.root \
+    gerda-pdfs/gerda-pdfs-2nufit-best/lar/inside_ms/K42/pdf-lar-inside_ms-K42.root \
     lar/M1_enrBEGe lar/M1_enrCoax \
-    distortions/pdf-K42_close-nplus_bege_vs_pplus_bege.root
+    distortions/pdf-K42_close-inside_ms_vs_nplus_bege.root
 
 ./take_ratio.C \
     gerda-pdfs/gerda-pdfs-2nufit-best/lar/above_array/K42/pdf-lar-above_array-K42.root \
-    gerda-pdfs/gerda-pdfs-2nufit-best/lar/sur_array/K42/pdf-lar-sur_array-K42.root \
+    gerda-pdfs/gerda-pdfs-2nufit-best/lar/outside_ms/K42/pdf-lar-outside_ms-K42.root \
     lar/M1_enrBEGe lar/M1_enrCoax \
-    distortions/pdf-K42_far-sur_array_vs_above_array.root
+    distortions/pdf-K42_far-outside_ms_vs_above_array.root
 
 ./take_ratio.C \
     gerda-pdfs/gerda-pdfs-2nufit-best/cables/cables_all/K40/pdf-cables-cables_all-K40.root \
@@ -68,4 +68,34 @@ done
     lar/M1_enrBEGe lar/M1_enrCoax \
     distortions/pdf-K40_close-minishroud_vs_holders.root
 
+./take_ratio.C \
+    gerda-pdfs/gerda-pdfs-2nufit-best/larveto/copper_shroud/K40/pdf-larveto-copper_shroud-K40.root \
+    gerda-pdfs/gerda-pdfs-2nufit-best/minishroud/ms_all/K40/pdf-minishroud-ms_all-K40.root \
+    lar/M1_enrBEGe lar/M1_enrCoax \
+    distortions/pdf-K40_close-minishroud_vs_copper_shroud.root
+
+./take_ratio.C \
+    gerda-pdfs/gerda-pdfs-2nufit-best/electronics/cc3/K40/pdf-electronics-cc3-K40.root \
+    gerda-pdfs/gerda-pdfs-2nufit-best/minishroud/ms_all/K40/pdf-minishroud-ms_all-K40.root \
+    lar/M1_enrBEGe lar/M1_enrCoax \
+    distortions/pdf-K40_close-minishroud_vs_electronics.root
+
 ./Bi212Tl208_distortion.C
+
+./take_ratio.C \
+    gerda-pdfs/gerda-pdfs-2nufit-best/cables/cables_all/Co60/pdf-cables-cables_all-Co60.root \
+    gerda-pdfs/gerda-pdfs-2nufit-best/cables/cables_all/Co60/pdf-cables-cables_all-Co60.root \
+    lar/M1_enrBEGe lar/M1_enrCoax \
+    distortions/pdf-unitary-distortion-all.root
+
+./take_ratio.C \
+    gerda-pdfs/gerda-pdfs-2nufit-best/gedet/intrinsic_bege/2nbb_SSD/pdf-gedet-intrinsic_bege-2nbb_SSD.root \
+    gerda-pdfs/gerda-pdfs-2nufit-best/gedet/intrinsic_bege/2nbb/pdf-gedet-intrinsic_bege-2nbb.root \
+    lar/M1_enrBEGe lar/M1_enrCoax \
+    distortions/pdf-2nbb-regular_vs_SSD.root
+
+./take_ratio.C \
+    gerda-pdfs/gerda-pdfs-2nufit-best/gedet/intrinsic_bege/2nbb_HSD/pdf-gedet-intrinsic_bege-2nbb_HSD.root \
+    gerda-pdfs/gerda-pdfs-2nufit-best/gedet/intrinsic_bege/2nbb/pdf-gedet-intrinsic_bege-2nbb.root \
+    lar/M1_enrBEGe lar/M1_enrCoax \
+    distortions/pdf-2nbb-regular_vs_HSD.root

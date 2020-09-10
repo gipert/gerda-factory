@@ -4,7 +4,7 @@
  * Created: Tue 18 Jun 2019
  *
  */
-#include "vector"
+#include <vector>
 
 #include "TH1.h"
 #include "TRandom3.h"
@@ -24,9 +24,13 @@ class GerdaFastFactory {
     GerdaFastFactory();
     ~GerdaFastFactory();
 
+    inline TH1* GetModel() const { return _model; }
+
     void SetCountsRange(float xmin, float xmax);
     void AddComponent(const TH1* hist, const float counts);
-    TH1* GetPseudoExp();
+    void AddComponent(const std::unique_ptr<TH1>& hist, const float counts);
+    TH1* FillPseudoExp();
+    void ResetComponents();
 
     private:
 

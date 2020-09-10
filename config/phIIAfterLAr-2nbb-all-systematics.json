@@ -1,25 +1,21 @@
 {
-    "logging" : "debug",
+    "logging" : "info",
     "output" : {
-        "file" : "../results/phIIAfterLAr-exp-pool.root",
-        "number-of-bins" : 8000,
+        "file" : "../results/output_all-systematics.root",
+        "number-of-bins" : 800,
         "xaxis-range" : [0, 8000]
     },
-    "range-for-counts" : [565, 2000],
+    "range-for-counts" : [560, 2000],
     "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-2nufit-best",
     "number-of-experiments" : 100,
     "hist-name" : "lar/M1_enrBEGe",
     "components" : [
         {
-            "root-file" : "../data/gerda-pdfs/pdf-functions.root",
+            "root-file" : "../data/alpha-pdf.root",
             "components" : {
-                "alpha-slope" : {
-                    "hist-name" : "ramp",
-                    "amount-cts" : 0
-                },
                 "alpha-offset" : {
-                    "hist-name" : "flat",
-                    "amount-cts" : 28
+                    "hist-name" : "hflat",
+                    "amount-cts" : 16
                 }
             }
         },
@@ -28,11 +24,11 @@
             "components" : {
                 "Bi212-Tl208" : {
                     "isotope" : { "Tl208" : 0.3539, "Bi212" : 1 },
-                    "amount-cts" : 36
+                    "amount-cts" : 72
                 },
                 "Pb214-Bi214" : {
                     "isotope" : { "Bi214" : 1, "Pb214" : 1 },
-                    "amount-cts" : 79
+                    "amount-cts" : 80
                 },
                 "Co60" : {
                     "isotope" : "Co60",
@@ -45,7 +41,7 @@
             "components" : {
                 "2nbb" : {
                     "isotope" : "2nbb",
-                    "amount-cts" : 45635
+                    "amount-cts" : 46427
                 }
             }
         },
@@ -54,7 +50,7 @@
             "components" : {
                 "Ac228" : {
                     "isotope" : "Ac228",
-                    "amount-cts" : 113
+                    "amount-cts" : 63
                 }
             }
         },
@@ -63,34 +59,25 @@
             "components" : {
                 "K40-close" : {
                     "isotope" : "K40",
-                    "amount-cts" : 1583
+                    "amount-cts" : 2600
                 }
             }
         },
         {
-            "part": "electronics/cc3",
-            "components" : {
-                "K40-far" : {
-                    "isotope" : "K40",
-                    "amount-cts" : 953
-                }
-            }
-        },
-        {
-            "part": "lar/sur_array",
+            "part": "lar/outside_ms",
             "components" : {
                 "K42-far" : {
                     "isotope" : "K42",
-                    "amount-cts" : 1313
+                    "amount-cts" : 802
                 }
             }
         },
         {
-            "part": "gedet/nplus_bege",
+            "part": "lar/inside_ms",
             "components" : {
                 "K42-close" : {
                     "isotope" : "K42",
-                    "amount-cts" : 316
+                    "amount-cts" : 954
                 }
             }
         }
@@ -124,16 +111,39 @@
             }
         },
         "specific" : {
-            "Ac228"       : { "pdfs" : [ "pdf-Ac228-holders_vs_fibers.root" ] },
-            "K40-far"     : { "pdfs" : [ "pdf-K40_far-cc3_vs_copper_shroud.root" ] },
-            "K42-close"   : { "pdfs" : [ "pdf-K42_close-nplus_bege_vs_pplus_bege.root" ] },
-            "K42-far"     : { "pdfs" : [ "pdf-K42_far-sur_array_vs_above_array.root" ] },
-            "Bi212-Tl208" : { "pdfs" : [ "pdf-Bi212_Tl208-cables_vs_fibers.root" ] },
+            "2nbb"        : {
+                "interpolate" : true,
+                "pdfs" : [
+                    "pdf-2nbb-regular_vs_SSD.root",
+                    "pdf-2nbb-regular_vs_HSD.root"
+                ]
+            },
+            "Ac228"       : {
+                "interpolate" : true,
+                "pdfs" : [ "pdf-Ac228-holders_vs_fibers.root" ]
+            },
+            "K42-close"   : {
+                "interpolate" : true,
+                "pdfs" : [
+                    "pdf-K42_close-inside_ms_vs_nplus_bege.root",
+                    "pdf-K42_close-inside_ms_vs_pplus_bege.root"
+                ]
+            },
+            "K42-far"     : {
+                "interpolate" : true,
+                "pdfs" : [ "pdf-K42_far-outside_ms_vs_above_array.root" ]
+            },
+            "Bi212-Tl208" : {
+                "interpolate" : true,
+                "pdfs" : [ "pdf-Bi212_Tl208-cables_vs_fibers.root" ]
+            },
             "K40-close"   : {
                 "interpolate" : true,
                 "pdfs" : [
                     "pdf-K40_close-minishroud_vs_cables.root",
-                    "pdf-K40_close-minishroud_vs_holders.root"
+                    "pdf-K40_close-minishroud_vs_holders.root",
+                    "pdf-K40_close-minishroud_vs_copper_shroud.root",
+                    "pdf-K40_close-minishroud_vs_electronics.root"
                 ]
             }
         }
