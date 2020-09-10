@@ -246,12 +246,18 @@ int main(int argc, char** argv) {
 
                         auto weight = rndgen.Uniform(1);
                         logs::out(logs::debug) << "distorting with weight = " << weight << std::endl;
-                        result->hist->Scale(weight);
-                        result->hist->Multiply(hdist.get());
-                        for (int b = 0; b <= result->hist->GetNbinsX(); ++b) {
-                            result->hist->SetBinContent(b, result->hist->GetBinContent(b) + 1 - weight);
-                        }
 
+			auto tmp = std::find_if(
+			    comp_list.begin(), comp_list.end(),
+			    [&it](utils::bkg_comp& a) { return a.name == it.key(); }
+			    );
+			
+			tmp->hist->Multiply(hdist.get());
+			tmp->hist->Scale(weight/tmp->hist->Integral());
+			result->hist->Scale((1-weight)/result->hist->Integral());
+			for (int b=0; b<= result->hist->GetNbinsX(); b++) {
+			  result->hist->SetBinContent(b, tmp->hist->GetBinContent(b) + result->hist->GetBinContent(b));
+			}
                         done_something = true;
                     }
                     else {
