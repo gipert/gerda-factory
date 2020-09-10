@@ -247,16 +247,13 @@ int main(int argc, char** argv) {
                         auto weight = rndgen.Uniform(1);
                         logs::out(logs::debug) << "distorting with weight = " << weight << std::endl;
 
-			auto tmp = std::find_if(
-			    comp_list.begin(), comp_list.end(),
-			    [&it](utils::bkg_comp& a) { return a.name == it.key(); }
-			    );
+			auto tmp = (TH1*)result->hist->Clone("tmp");
 			
-			tmp->hist->Multiply(hdist.get());
-			tmp->hist->Scale(weight/tmp->hist->Integral());
+			tmp->Multiply(hdist.get());
+			tmp->Scale(weight/tmp->Integral());
 			result->hist->Scale((1-weight)/result->hist->Integral());
 			for (int b=0; b<= result->hist->GetNbinsX(); b++) {
-			  result->hist->SetBinContent(b, tmp->hist->GetBinContent(b) + result->hist->GetBinContent(b));
+			  result->hist->SetBinContent(b, tmp->GetBinContent(b) + result->hist->GetBinContent(b));
 			}
                         done_something = true;
                     }
