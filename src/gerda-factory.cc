@@ -252,9 +252,10 @@ int main(int argc, char** argv) {
 			tmp->Multiply(hdist.get());
 			tmp->Scale(weight/tmp->Integral());
 			result->hist->Scale((1-weight)/result->hist->Integral());
-			for (int b=0; b<= result->hist->GetNbinsX(); b++) {
-			  result->hist->SetBinContent(b, tmp->GetBinContent(b) + result->hist->GetBinContent(b));
-			}
+			result->hist->Add(tmp);
+			//			for (int b=0; b<= result->hist->GetNbinsX(); b++) {
+			// result->hist->SetBinContent(b, tmp->GetBinContent(b) + result->hist->GetBinContent(b));
+			//}
                         done_something = true;
                     }
                     else {
