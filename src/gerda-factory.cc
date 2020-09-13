@@ -146,11 +146,14 @@ int main(int argc, char** argv) {
                             auto weight = rndgen.Uniform(1);
                             logs::out(logs::debug) << "successfully found corresponding fit component '" << itt->name
                                                    << "', distorting with weight = " << weight << std::endl;
-                            result->hist->Scale(weight);
-                            result->hist->Multiply(itt->hist.get());
-                            for (int b = 0; b <= result->hist->GetNbinsX(); ++b) {
-                                result->hist->SetBinContent(b, result->hist->GetBinContent(b) + 1 - weight);
-                            }
+
+                            auto result_tmp = dynamic_cast<TH1*>(result->hist->Clone());
+                            result_tmp->Multiply(itt->hist.get());
+                            result_tmp->Scale(weight/result_tmp->Integral());
+
+                            result->hist->Scale((1-weight)/result->hist->Integral());
+                            result->hist->Add(result_tmp);
+
                             done_something = true;
                         }
                         else {
@@ -246,11 +249,13 @@ int main(int argc, char** argv) {
 
                         auto weight = rndgen.Uniform(1);
                         logs::out(logs::debug) << "distorting with weight = " << weight << std::endl;
-                        result->hist->Scale(weight);
-                        result->hist->Multiply(hdist.get());
-                        for (int b = 0; b <= result->hist->GetNbinsX(); ++b) {
-                            result->hist->SetBinContent(b, result->hist->GetBinContent(b) + 1 - weight);
-                        }
+
+                        auto result_tmp = dynamic_cast<TH1*>(result->hist->Clone());
+                        result_tmp->Multiply(hdist.get());
+                        result_tmp->Scale(weight/result_tmp->Integral());
+
+                        result->hist->Scale((1-weight)/result->hist->Integral());
+                        result->hist->Add(result_tmp);
 
                         done_something = true;
                     }

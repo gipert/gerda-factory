@@ -1,5 +1,5 @@
 {
-    "logging" : "debug",
+    "logging" : "info",
     "output" : {
         "file" : "../results/phIIAfterLAr-exp-pool.root",
         "number-of-bins" : 8000,
@@ -10,19 +10,6 @@
     "number-of-experiments" : 100,
     "hist-name" : "lar/M1_enrBEGe",
     "components" : [
-        {
-            "root-file" : "../data/gerda-pdfs/pdf-functions.root",
-            "components" : {
-                "alpha-slope" : {
-                    "hist-name" : "ramp",
-                    "amount-cts" : 0
-                },
-                "alpha-offset" : {
-                    "hist-name" : "flat",
-                    "amount-cts" : 28
-                }
-            }
-        },
         {
             "part": "cables/cables_all",
             "components" : {
@@ -68,16 +55,7 @@
             }
         },
         {
-            "part": "electronics/cc3",
-            "components" : {
-                "K40-far" : {
-                    "isotope" : "K40",
-                    "amount-cts" : 953
-                }
-            }
-        },
-        {
-            "part": "lar/sur_array",
+            "part": "lar/outside_ms",
             "components" : {
                 "K42-far" : {
                     "isotope" : "K42",
@@ -86,7 +64,7 @@
             }
         },
         {
-            "part": "gedet/nplus_bege",
+            "part": "lar/inside_ms",
             "components" : {
                 "K42-close" : {
                     "isotope" : "K42",
@@ -125,15 +103,21 @@
         },
         "specific" : {
             "Ac228"       : { "pdfs" : [ "pdf-Ac228-holders_vs_fibers.root" ] },
-            "K40-far"     : { "pdfs" : [ "pdf-K40_far-cc3_vs_copper_shroud.root" ] },
-            "K42-close"   : { "pdfs" : [ "pdf-K42_close-nplus_bege_vs_pplus_bege.root" ] },
-            "K42-far"     : { "pdfs" : [ "pdf-K42_far-sur_array_vs_above_array.root" ] },
+            "K42-close"   : {
+                "pdfs" : [
+                    "pdf-K42_close-inside_ms_vs_nplus_bege.root",
+                    "pdf-K42_close-inside_ms_vs_pplus_bege.root"
+                ]
+            },
+            "K42-far"     : { "pdfs" : [ "pdf-K42_far-outside_ms_vs_above_array.root" ] },
             "Bi212-Tl208" : { "pdfs" : [ "pdf-Bi212_Tl208-cables_vs_fibers.root" ] },
             "K40-close"   : {
                 "interpolate" : true,
                 "pdfs" : [
                     "pdf-K40_close-minishroud_vs_cables.root",
-                    "pdf-K40_close-minishroud_vs_holders.root"
+                    "pdf-K40_close-minishroud_vs_holders.root",
+                    "pdf-K40_close-minishroud_vs_copper_shroud.root",
+                    "pdf-K40_close-minishroud_vs_cc3.root"
                 ]
             }
         }
