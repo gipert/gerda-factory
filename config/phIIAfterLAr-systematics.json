@@ -102,15 +102,25 @@
             }
         },
         "specific" : {
-            "Ac228"       : { "pdfs" : [ "pdf-Ac228-holders_vs_fibers.root" ] },
+            "Ac228"       : {
+                "interpolate" : true,
+                "pdfs" : [ "pdf-Ac228-holders_vs_fibers.root" ]
+            },
             "K42-close"   : {
+                "interpolate" : true,
                 "pdfs" : [
                     "pdf-K42_close-inside_ms_vs_nplus_bege.root",
                     "pdf-K42_close-inside_ms_vs_pplus_bege.root"
                 ]
             },
-            "K42-far"     : { "pdfs" : [ "pdf-K42_far-outside_ms_vs_above_array.root" ] },
-            "Bi212-Tl208" : { "pdfs" : [ "pdf-Bi212_Tl208-cables_vs_fibers.root" ] },
+            "K42-far"     : {
+                "interpolate" : true,
+                "pdfs" : [ "pdf-K42_far-outside_ms_vs_above_array.root" ]
+            },
+            "Bi212-Tl208" : {
+                "interpolate" : true,
+                "pdfs" : [ "pdf-Bi212_Tl208-cables_vs_fibers.root" ]
+            },
             "K40-close"   : {
                 "interpolate" : true,
                 "pdfs" : [
