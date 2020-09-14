@@ -121,20 +121,27 @@ The syntax is the following:
         "global" : {  // category of distortions that should be applied on all the components
                       // the structure of the folders must be organized in the same way as the GERDA PDFs
                       // releases and the name of the histogram must match
-            "distortion-type1" : [  // set the deformation type (not important)
-                "folder1",  // list here the folder names
-                ...
-            ],
+            "distortion-type1" : {  // set the deformation type (not important)
+                "pdfs" : [
+                    "folder1",  // list here the folder names
+                    ...
+                ],
+                "interpolate": true  // can randomly reduce the magnitude of the distortion
+                                     // by mixing it with the unitary distortion
+            },
             ...
         },
         "specific" : {  // category of distortions that have to be applied to single components
-            "component1"  : [ "file1.root" ], // the name of the component must be listed also in the
+            "component1"  : { "pdfs" : [ "file1.root" ] }, // the name of the component must be listed also in the
                                               // list of model components above!
-            "component2"   : [
-                "file2.root:objname",  // single ROOT file with eventual object name
-                "file3.root",
-                ...
-            ]
+            "component2" : {
+                "pdfs" : [
+                    "file2.root:objname",  // single ROOT file with eventual object name
+                    "file3.root",
+                    ...
+                ],
+                "interpolate" : true,
+            }
         }
     }
 ```
