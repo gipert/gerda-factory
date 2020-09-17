@@ -1,7 +1,10 @@
-bin
-data/distortions
-data/gerda-pdfs
-results
+/src/gerda-factory
+/src/gerda-fake-gen
+/data/distortions
+/data/gerda-pdfs
+/results
+
+*.sif
 
 # junk
 .DS_Store

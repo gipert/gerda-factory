@@ -1,0 +1,12 @@
+Bootstrap: library
+From: gipert/default/root-cern:6.20.04
+
+%files
+    src /opt/src/gerda-factory
+
+%post
+    cd /opt/src/gerda-factory
+    make clean && make && make PREFIX=/opt install
+
+%environment
+    export PATH="$PATH:/opt/bin"
