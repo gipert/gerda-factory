@@ -37,6 +37,15 @@
             }
         },
         {
+            "part": "gedet/intrinsic_bege",
+            "components" : {
+                "0nbbM1" : {
+                    "isotope" : "0nbbM1",
+                    "amount-cts" : 100
+                }
+            }
+        },
+        {
             "part": "ge_holders/ge_holders_all",
             "components" : {
                 "Ac228" : {
@@ -71,6 +80,12 @@
                     "amount-cts" : 316
                 }
             }
+        }
+    ],
+    "amount-cts-smearing" : [
+        {
+            "components" : [ "2nbb", "0nbbM1" ],
+            "smearing-percent" : 2.0
         }
     ],
     "pdf-distortions" : {

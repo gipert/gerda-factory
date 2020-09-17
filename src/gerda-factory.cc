@@ -101,8 +101,8 @@ int main(int argc, char** argv) {
     progressbar bar(niter);
     bar.set_todo_char(" ");
     bar.set_done_char("█");
-    bar.set_opening_bracket_char("");
-    bar.set_closing_bracket_char("");
+    bar.set_opening_bracket_char("[");
+    bar.set_closing_bracket_char("]");
     logs::out(logs::info) << "generating " << niter << " experiments ";
     logs::out(logs::detail) << std::endl;
     for (int i = 0; i < niter; ++i) {
@@ -300,8 +300,53 @@ int main(int argc, char** argv) {
         }
         if (!done_something) logs::out(logs::warning) << "did not distort anything!" << std::endl;
 
+        // see if we're asked to put some additional uncertainty on the number of counts to be sampled
+        std::map<std::string,float> cts_uncertainty_factor;
+        if (config.contains("amount-cts-smearing")) {
+            if (!config["amount-cts-smearing"].is_array()) {
+                throw std::runtime_error("the \"amount-cts-smearing\" key value must be an array");
+            }
+
+            for (auto& o : config["amount-cts-smearing"]) {
+                if (!o.is_object()) throw std::runtime_error("items in \"amount-cts-smearing\" must be objects");
+                if (!o["components"].is_array()) throw std::runtime_error("\"amount-cts-smearing\"/\"components\" must be an array");
+                if (!o.contains("smearing-percent")) throw std::runtime_error("missing \"smearing-percent\" key in \"amount-cts-smearing\"");
+
+                float rnd_percent = rndgen.Gaus(1, 0.01*o["smearing-percent"].get<float>());
+                rnd_percent = (rnd_percent >= 0 ? rnd_percent : 0);
+
+                for (auto& c : o["components"]) {
+
+                    // see if we have a corresponding fit component
+                    auto result = std::find_if(
+                            comp_list.begin(), comp_list.end(),
+                            [&c](utils::bkg_comp& a) { return a.name == c.get<std::string>(); }
+                            );
+
+                    if (result == comp_list.end()) {
+                        throw std::runtime_error(
+                            "in \"amount-cts-smearing\": could not find component '" +
+                            c.get<std::string>() + "' in the experiment config");
+                    }
+
+                    logs::out(logs::detail) << "adding uncertainty factor = " << rnd_percent
+                                            << " to counts for component '" << c.get<std::string>()
+                                            << "'" << std::endl;
+                    cts_uncertainty_factor.emplace(c.get<std::string>(), rnd_percent);
+                }
+
+            }
+        }
+
         // add components to the factory
-        for (auto& e : comp_list) factory.AddComponent(e.hist.get(), e.counts);
+        for (auto& e : comp_list) {
+            if (cts_uncertainty_factor.find(e.name) == cts_uncertainty_factor.end()) {
+                factory.AddComponent(e.hist.get(), e.counts);
+            }
+            else {
+                factory.AddComponent(e.hist.get(), e.counts*cts_uncertainty_factor[e.name]);
+            }
+        }
 
         // now generate the experiment
         logs::out(logs::detail) << "filling output histogram" << std::endl;
