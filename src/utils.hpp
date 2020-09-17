@@ -227,6 +227,11 @@ namespace utils {
 
                             collection.emplace_back(sum_parts(i.key()));
                             collection.back()->Scale(i.value().get<double>()/sumwi);
+                            for (int b = 0; b <= collection.back()->GetNbinsX()+1; ++b) {
+                                if (collection.back()->GetBinContent(b) < 0) {
+                                    collection.back()->SetBinContent(b, 0);
+                                }
+                            }
                         }
                         // now sum them all
                         for (auto it = collection.begin()+1; it != collection.end(); it++) collection[0]->Add(it->get());
