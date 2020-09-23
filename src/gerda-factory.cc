@@ -147,12 +147,12 @@ int main(int argc, char** argv) {
                             logs::out(logs::debug) << "successfully found corresponding fit component '" << itt->name
                                                    << "', distorting with weight = " << weight << std::endl;
 
-                            auto result_tmp = dynamic_cast<TH1*>(result->hist->Clone());
+                            std::unique_ptr<TH1> result_tmp(dynamic_cast<TH1*>(result->hist->Clone()));
                             result_tmp->Multiply(itt->hist.get());
                             result_tmp->Scale(weight/result_tmp->Integral());
 
                             result->hist->Scale((1-weight)/result->hist->Integral());
-                            result->hist->Add(result_tmp);
+                            result->hist->Add(result_tmp.get());
 
                             done_something = true;
                         }
@@ -250,12 +250,12 @@ int main(int argc, char** argv) {
                         auto weight = rndgen.Uniform(1);
                         logs::out(logs::debug) << "distorting with weight = " << weight << std::endl;
 
-                        auto result_tmp = dynamic_cast<TH1*>(result->hist->Clone());
+                        std::unique_ptr<TH1> result_tmp(dynamic_cast<TH1*>(result->hist->Clone()));
                         result_tmp->Multiply(hdist.get());
                         result_tmp->Scale(weight/result_tmp->Integral());
 
                         result->hist->Scale((1-weight)/result->hist->Integral());
-                        result->hist->Add(result_tmp);
+                        result->hist->Add(result_tmp.get());
 
                         done_something = true;
                     }

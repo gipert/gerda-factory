@@ -42,7 +42,7 @@ namespace utils {
         return out;
     };
 
-    // The returned TH1 is owned by the user
+    // The returned raw TH1 pointer is owned by the user
     std::unique_ptr<TH1> get_component(std::string filename, std::string objectname, int nbinsx = 100, double xmin = 0, double xmax = 100) {
         TFile _tf(filename.c_str());
         if (!_tf.IsOpen()) throw std::runtime_error("invalid ROOT file: " + filename);
@@ -68,7 +68,7 @@ namespace utils {
         }
         else if (obj->InheritsFrom(TF1::Class())) {
             std::unique_ptr<TH1> _th(new TH1D(obj->GetName(), obj->GetTitle(), nbinsx, xmin, xmax));
-            for (int b = 1; b < _th->GetNbinsX(); ++b) {
+            for (int b = 1; b <= _th->GetNbinsX(); ++b) {
                 _th->SetBinContent(b, dynamic_cast<TF1*>(obj)->Eval(_th->GetBinCenter(b)));
             }
             _th->SetDirectory(nullptr); // just to be sure
