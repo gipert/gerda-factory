@@ -26,7 +26,8 @@ class GerdaFastFactory {
 
     void SetCountsRange(float xmin, float xmax);
     void AddComponent(const TH1* hist, const float counts);
-    TH1* GetPseudoExp();
+    void AddComponent(const std::unique_ptr<TH1>& hist, const float counts);
+    TH1* FillPseudoExp();
 
     private:
 
