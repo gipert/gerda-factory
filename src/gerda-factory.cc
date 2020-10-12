@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < niter; ++i) {
         if (logs::min_level > logs::detail) bar.update();
         // reset components
-        //factory.ResetComponents();
+        factory.ResetComponents();
         comp_list.clear();
         comp_list = utils::deep_copy(comp_list_save);
 

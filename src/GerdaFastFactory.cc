@@ -28,8 +28,8 @@ void GerdaFastFactory::AddComponent(const TH1* hist, const float counts) {
 
     // clone
     auto htmp = dynamic_cast<TH1*>(
-        hist->Clone(("comp_" + std::to_string(_rndgen.Uniform(0,1E6))).c_str())
-    );
+	 hist->Clone(("comp_" + std::to_string(_rndgen.Uniform(0,1E6))).c_str())
+	 );
 
     // normalize to requested weight
     if (_range.first == 0 and _range.second == 0) htmp->Scale(counts/htmp->Integral());
@@ -37,8 +37,8 @@ void GerdaFastFactory::AddComponent(const TH1* hist, const float counts) {
 
     // initialize total model, if needed
     if (!_model) {
-        _model = dynamic_cast<TH1*>(hist->Clone("model"));
-        _model->Reset();
+      _model = dynamic_cast<TH1*>(hist->Clone("model"));
+      _model->Reset();
     }
 
     // add
@@ -61,3 +61,6 @@ TH1* GerdaFastFactory::FillPseudoExp() {
 
 }
 
+void GerdaFastFactory::ResetComponents() {
+  _model = nullptr;
+}
