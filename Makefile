@@ -6,19 +6,26 @@
 CXX      = c++ -Wall -Wextra -std=c++11 -g -O3
 CXXFLAGS = $$(root-config --cflags)
 LIBS     = $$(root-config --libs) -lMinuit -lTreePlayer
+PREFIX   = /usr/local
+EXE      = gerda-fake-gen gerda-factory
 
-all: dirs bin/gerda-fake-gen bin/gerda-factory
+all: $(EXE)
 
-dirs :
-	@mkdir -p bin
+#gerda-fake-gen : gerda-fake-gen.cc GerdaFactory.cc GerdaFactory.h utils.hpp
+#	$(CXX) $(CXXFLAGS) -o $@ $< GerdaFactory.cc $(LIBS)
 
-bin/gerda-fake-gen : src/gerda-fake-gen.cc src/GerdaFactory.cc src/GerdaFactory.h src/utils.hpp
-	$(CXX) $(CXXFLAGS) -o $@ $< src/GerdaFactory.cc $(LIBS)
+gerda-factory : gerda-factory.cc GerdaFastFactory.cc GerdaFastFactory.h utils.hpp
+	$(CXX) $(CXXFLAGS) -o $@ $< GerdaFastFactory.cc $(LIBS)
 
-bin/gerda-factory : src/gerda-factory.cc src/GerdaFactory.cc src/GerdaFactory.h src/utils.hpp
-	$(CXX) $(CXXFLAGS) -o $@ $< src/GerdaFactory.cc $(LIBS)
+#gerda-factory : gerda-factory.cc GerdaFactory.cc GerdaFactory.h utils.hpp
+#        $(CXX) $(CXXFLAGS) -o $@ $< GerdaFactory.cc $(LIBS)
+
 
 clean :
-	-rm -r bin
+	-rm -r $(EXE)
 
-.PHONY : clean dirs
+install : $(EXE)
+	install -d $(PREFIX)/bin
+	install $^ $(PREFIX)/bin
+
+.PHONY : clean install

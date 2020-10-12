@@ -15,6 +15,7 @@
 namespace logs = utils::logging;
 
 #include "GerdaFactory.h"
+#include "GerdaFastFactory.h"
 
 int main(int argc, char** argv) {
 
@@ -67,7 +68,7 @@ int main(int argc, char** argv) {
      * create model
      */
 
-    GerdaFactory factory;
+    GerdaFastFactory factory;
 
     // set range for counts
     if (config["range-for-counts"].is_array()) {
@@ -101,14 +102,14 @@ int main(int argc, char** argv) {
     progressbar bar(niter);
     bar.set_todo_char(" ");
     bar.set_done_char("█");
-    bar.set_opening_bracket_char("");
-    bar.set_closing_bracket_char("");
+    bar.set_opening_bracket_char("[");
+    bar.set_closing_bracket_char("]");
     logs::out(logs::info) << "generating " << niter << " experiments ";
     logs::out(logs::detail) << std::endl;
     for (int i = 0; i < niter; ++i) {
         if (logs::min_level > logs::detail) bar.update();
         // reset components
-        factory.ResetComponents();
+        //factory.ResetComponents();
         comp_list.clear();
         comp_list = utils::deep_copy(comp_list_save);
 
@@ -146,11 +147,14 @@ int main(int argc, char** argv) {
                             auto weight = rndgen.Uniform(1);
                             logs::out(logs::debug) << "successfully found corresponding fit component '" << itt->name
                                                    << "', distorting with weight = " << weight << std::endl;
-                            result->hist->Scale(weight);
-                            result->hist->Multiply(itt->hist.get());
-                            for (int b = 0; b <= result->hist->GetNbinsX(); ++b) {
-                                result->hist->SetBinContent(b, result->hist->GetBinContent(b) + 1 - weight);
-                            }
+
+                            auto result_tmp = dynamic_cast<TH1*>(result->hist->Clone());
+                            result_tmp->Multiply(itt->hist.get());
+                            result_tmp->Scale(weight/result_tmp->Integral());
+
+                            result->hist->Scale((1-weight)/result->hist->Integral());
+                            result->hist->Add(result_tmp);
+
                             done_something = true;
                         }
                         else {
@@ -247,15 +251,13 @@ int main(int argc, char** argv) {
                         auto weight = rndgen.Uniform(1);
                         logs::out(logs::debug) << "distorting with weight = " << weight << std::endl;
 
-			auto tmp = (TH1*)result->hist->Clone("tmp");
-			
-			tmp->Multiply(hdist.get());
-			tmp->Scale(weight/tmp->Integral());
-			result->hist->Scale((1-weight)/result->hist->Integral());
-			result->hist->Add(tmp);
-			//			for (int b=0; b<= result->hist->GetNbinsX(); b++) {
-			// result->hist->SetBinContent(b, tmp->GetBinContent(b) + result->hist->GetBinContent(b));
-			//}
+                        auto result_tmp = dynamic_cast<TH1*>(result->hist->Clone());
+                        result_tmp->Multiply(hdist.get());
+                        result_tmp->Scale(weight/result_tmp->Integral());
+
+                        result->hist->Scale((1-weight)/result->hist->Integral());
+                        result->hist->Add(result_tmp);
+
                         done_something = true;
                     }
                     else {
@@ -299,8 +301,53 @@ int main(int argc, char** argv) {
         }
         if (!done_something) logs::out(logs::warning) << "did not distort anything!" << std::endl;
 
+        // see if we're asked to put some additional uncertainty on the number of counts to be sampled
+        std::map<std::string,float> cts_uncertainty_factor;
+        if (config.contains("amount-cts-smearing")) {
+            if (!config["amount-cts-smearing"].is_array()) {
+                throw std::runtime_error("the \"amount-cts-smearing\" key value must be an array");
+            }
+
+            for (auto& o : config["amount-cts-smearing"]) {
+                if (!o.is_object()) throw std::runtime_error("items in \"amount-cts-smearing\" must be objects");
+                if (!o["components"].is_array()) throw std::runtime_error("\"amount-cts-smearing\"/\"components\" must be an array");
+                if (!o.contains("smearing-percent")) throw std::runtime_error("missing \"smearing-percent\" key in \"amount-cts-smearing\"");
+
+                float rnd_percent = rndgen.Gaus(1, 0.01*o["smearing-percent"].get<float>());
+                rnd_percent = (rnd_percent >= 0 ? rnd_percent : 0);
+
+                for (auto& c : o["components"]) {
+
+                    // see if we have a corresponding fit component
+                    auto result = std::find_if(
+                            comp_list.begin(), comp_list.end(),
+                            [&c](utils::bkg_comp& a) { return a.name == c.get<std::string>(); }
+                            );
+
+                    if (result == comp_list.end()) {
+                        throw std::runtime_error(
+                            "in \"amount-cts-smearing\": could not find component '" +
+                            c.get<std::string>() + "' in the experiment config");
+                    }
+
+                    logs::out(logs::detail) << "adding uncertainty factor = " << rnd_percent
+                                            << " to counts for component '" << c.get<std::string>()
+                                            << "'" << std::endl;
+                    cts_uncertainty_factor.emplace(c.get<std::string>(), rnd_percent);
+                }
+
+            }
+        }
+
         // add components to the factory
-        for (auto& e : comp_list) factory.AddComponent(e.hist.get(), e.counts);
+        for (auto& e : comp_list) {
+            if (cts_uncertainty_factor.find(e.name) == cts_uncertainty_factor.end()) {
+                factory.AddComponent(e.hist.get(), e.counts);
+            }
+            else {
+                factory.AddComponent(e.hist.get(), e.counts*cts_uncertainty_factor[e.name]);
+            }
+        }
 
         // now generate the experiment
         logs::out(logs::detail) << "filling output histogram" << std::endl;
@@ -311,8 +358,9 @@ int main(int argc, char** argv) {
             config["output"].value("xaxis-range", std::vector<int>{0, 8000})[0],
             config["output"].value("xaxis-range", std::vector<int>{0, 8000})[1]
         );
-        factory.FillPseudoExp(hexp);
-
+        hexp = (TH1D*)factory.FillPseudoExp();
+	hexp->SetName(((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str());
+	hexp->SetTitle("Pseudo experiment");
         experiments.push_back(hexp);
         logs::out(logs::debug) << "object " << hexp->GetName()
                                << " added to collection " << std::endl;
