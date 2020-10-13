@@ -351,14 +351,12 @@ int main(int argc, char** argv) {
 
         // now generate the experiment
         logs::out(logs::detail) << "filling output histogram" << std::endl;
-        auto hexp = new TH1D(
-            ((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str(),
-            "Pseudo experiment",
-            config["output"].value("number-of-bins", 8000),
-            config["output"].value("xaxis-range", std::vector<int>{0, 8000})[0],
-            config["output"].value("xaxis-range", std::vector<int>{0, 8000})[1]
-        );
-        hexp = (TH1D*)factory.FillPseudoExp();
+	auto hexp = (TH1D*)factory.FillPseudoExp();
+	if(config["output"]["number-of-bins"].get<int>()!=8000){
+          if(8000 % config["output"]["number-of-bins"].get<int>() != 0){
+            throw std::runtime_error("\"number-of-bins\" must be an exact divider of \"xaxis-range\"");
+          }else hexp->Rebin(8000 / config["output"]["number-of-bins"].get<int>());
+        }
 	hexp->SetName(((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str());
 	hexp->SetTitle("Pseudo experiment");
         experiments.push_back(hexp);
