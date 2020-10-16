@@ -233,14 +233,14 @@ namespace utils {
 
                             collection.emplace_back(sum_parts(i.key()));
                             collection.back()->Scale(i.value().get<double>()/sumwi);
-                            for (int b = 0; b <= collection.back()->GetNbinsX()+1; ++b) {
-                                if (collection.back()->GetBinContent(b) < 0) {
-                                    collection.back()->SetBinContent(b, 0);
-                                }
-                            }
                         }
                         // now sum them all
                         for (auto it = collection.begin()+1; it != collection.end(); it++) collection[0]->Add(it->get());
+			for (int b = 0; b <= collection[0]->GetNbinsX()+1; ++b) {
+			  if (collection[0]->GetBinContent(b) < 0) {
+			    collection[0]->SetBinContent(b, 0);
+			  }
+			}
                         comp_map.emplace_back(iso.key(), collection[0].release(), iso.value()["amount-cts"].get<float>());
                     }
                     else throw std::runtime_error("unexpected entry " + iso.value()["isotope"].dump()
