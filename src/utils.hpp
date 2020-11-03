@@ -131,7 +131,7 @@ namespace utils {
         }
     }
 
-    std::vector<bkg_comp> get_components_json(json& config, std::string gerda_pdfs = "") {
+    std::vector<bkg_comp> get_components_json(json& config, std::string gerda_pdfs = "", bool discard_user_files = false) {
         std::vector<bkg_comp> comp_map;
 
         // eventually get a global value for the gerda-pdfs path
@@ -200,13 +200,15 @@ namespace utils {
 
                 // it's a user defined file
                 if (it.contains("root-file")) {
-                    auto filename = it["root-file"].get<std::string>();
-                    auto objname = iso.value()["hist-name"].get<std::string>();
-                    auto th = utils::get_component(filename, objname, 8000, 0, 8000);
-                    th->SetName((iso.key() + "_" + std::string(th->GetName())).c_str());
+                    if (!discard_user_files) {
+                        auto filename = it["root-file"].get<std::string>();
+                        auto objname = iso.value()["hist-name"].get<std::string>();
+                        auto th = utils::get_component(filename, objname, 8000, 0, 8000);
+                        th->SetName((iso.key() + "_" + std::string(th->GetName())).c_str());
 
-                    // comp_map now owns the histogram
-                    comp_map.emplace_back(iso.key(), th.release(), iso.value()["amount-cts"].get<float>());
+                        // comp_map now owns the histogram
+                        comp_map.emplace_back(iso.key(), th.release(), iso.value()["amount-cts"].get<float>());
+                    }
                 }
                 else { // look into gerda-pdfs database
                     if (iso.value()["isotope"].is_string()) {
