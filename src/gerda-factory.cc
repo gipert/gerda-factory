@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
                                             << "'" << (interpolate ? " -> interpolate" : "") << std::endl;
 
                     // get histograms
-                    auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>());
+                    auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>(), true);
                     for (auto itt = dist_list.begin(); itt != dist_list.end(); itt++) {
                         // see if we have a corresponding fit component
                         auto result = std::find_if(
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
                                                 << "'" << std::endl;
 
                         // get histograms
-                        auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>());
+                        auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>(), true);
                         for (auto itt = dist_list.begin(); itt != dist_list.end(); itt++) {
                             // see if we have a corresponding fit component
                             auto result = std::find_if(
