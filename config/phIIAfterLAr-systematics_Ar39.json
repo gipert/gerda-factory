@@ -1,0 +1,87 @@
+{
+    "logging" : "info",
+    "output" : {
+        "file" : "../results/phIIAfterLAr-exp-pool.root",
+        "number-of-bins" : 8000,
+        "xaxis-range" : [0, 8000]
+    },
+    "range-for-counts" : [565, 2000],
+    "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-2nufit-best",
+    "number-of-experiments" : 100,
+    "hist-name" : "lar/M1_enrBEGe",
+    "components" : [
+        {
+            "part": "cables/cables_all",
+            "components" : {
+                "Pb214-Bi214" : {
+                    "isotope" : { "Bi214" : 1, "Pb214" : 1 },
+                    "amount-cts" : 1571
+                }
+            }
+        },
+        {
+            "part": "gedet/intrinsic_bege",
+            "components" : {
+                "2nbb" : {
+                    "isotope" : "2nbb",
+                    "amount-cts" : 1931
+                }
+            }
+        },
+        {
+            "part": "minishroud/ms_all",
+            "components" : {
+                "K40-close" : {
+                    "isotope" : "K40",
+                    "amount-cts" : 3014
+                }
+            }
+        },
+        {
+            "part": "lar/outside_ms",
+            "components" : {
+                "K42-far" : {
+                    "isotope" : "K42",
+                    "amount-cts" : 16795
+                }
+            }
+        }
+    ],
+    "pdf-distortions" : {
+        "prefix" : "../data/distortions",
+        "global" : {
+            "transition-layer" : {
+                "pdfs" : [
+                    "gerda-pdfs-2nufit-tlayer-m1sigma"
+                ]
+            }
+        },
+        "specific" : {
+            "Bi212-Tl208" : {
+                "interpolate" : true,
+                "pdfs" : [ 
+		    "pdf-Bi212_Tl208-cables_vs_fibers.root",
+		    "pdf-Bi212_Tl208-cables_vs_minishroud.root",
+		    "pdf-Bi212_Tl208-cables_vs_holders.root"      
+		]
+            },
+            "K40-close"   : {
+                "interpolate" : true,
+                "pdfs" : [
+                    "pdf-K40_close-minishroud_vs_cables.root",
+                    "pdf-K40_close-minishroud_vs_holders.root",
+                    "pdf-K40_close-minishroud_vs_inner_fibers.root",
+                    "pdf-K40_close-minishroud_vs_outer_fibers.root"
+                ]
+            },
+            "K42-close"   : {
+                "interpolate" : true,
+                "pdfs" : [
+                    "pdf-K42_close-inside_ms_vs_outside_ms.root",
+                    "pdf-K42_close-inside_ms_vs_above_array.root",
+                    "pdf-K42_close-inside_ms_vs_sur_array.root"
+                ]
+            }
+        }
+    }
+}
