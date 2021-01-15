@@ -1,0 +1,92 @@
+{
+    "logging" : "info",
+    "output" : {
+        "file" : "../results/output_no-systematics.root",
+        "number-of-bins" : 800,
+        "xaxis-range" : [0, 8000]
+    },
+    "range-for-counts" : [560, 2000],
+    "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-2nufit-best",
+    "number-of-experiments" : 100,
+    "hist-name" : "lar/M1_enrBEGe",
+    "components" : [
+        { 
+            "root-file" : "../data/alpha_pdf.root",
+            "components" : {
+                "alpha-offset" : {
+                    "hist-name" : "hflat",
+                    "amount-cts" : 16
+                }
+            }
+        },
+        {
+            "part": "cables/cables_all",
+            "components" : {
+                "Bi212-Tl208" : {
+                    "isotope" : { "Tl208" : 0.3539, "Bi212" : 1 },
+                    "amount-cts" : 72
+                },
+                "Pb214-Bi214" : {
+                    "isotope" : { "Bi214" : 1, "Pb214" : 1 },
+                    "amount-cts" : 80
+                },
+                "Co60" : {
+                    "isotope" : "Co60",
+                    "amount-cts" : 25
+                }
+            }
+        },
+        {
+            "part": "gedet/intrinsic_bege",
+            "components" : {
+                "2nbb" : {
+                    "isotope" : "2nbb",
+                    "amount-cts" : 46427
+                }
+            }
+        },
+        {
+            "part": "ge_holders/ge_holders_all",
+            "components" : {
+                "Ac228" : {
+                    "isotope" : "Ac228",
+                    "amount-cts" : 63
+                }
+            }
+        },
+        {
+            "part": "minishroud/ms_all",
+            "components" : {
+                "K40-close" : {
+                    "isotope" : "K40",
+                    "amount-cts" : 2600
+                }
+            }
+        },
+        {
+            "part": "lar/outside_ms",
+            "components" : {
+                "K42-far" : {
+                    "isotope" : "K42",
+                    "amount-cts" : 802
+                }
+            }
+        },
+        {
+            "part": "lar/inside_ms",
+            "components" : {
+                "K42-close" : {
+                    "isotope" : "K42",
+                    "amount-cts" : 954
+                }
+            }
+        }
+    ],
+    "pdf-distortions" : {
+        "prefix" : "../data/distortions",
+        "specific" : {
+            "Co60"       : { "interpolate" : false, 
+			      "pdfs" : [ "pdf-unitary-distortion-all.root" ] }
+        }
+    }
+}
