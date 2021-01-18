@@ -42,7 +42,7 @@ namespace utils {
         return out;
     };
 
-    // The returned TH1 is owned by the user
+    // The returned raw TH1 pointer is owned by the user
     std::unique_ptr<TH1> get_component(std::string filename, std::string objectname, int nbinsx = 100, double xmin = 0, double xmax = 100) {
         TFile _tf(filename.c_str());
         if (!_tf.IsOpen()) throw std::runtime_error("invalid ROOT file: " + filename);
@@ -68,7 +68,7 @@ namespace utils {
         }
         else if (obj->InheritsFrom(TF1::Class())) {
             std::unique_ptr<TH1> _th(new TH1D(obj->GetName(), obj->GetTitle(), nbinsx, xmin, xmax));
-            for (int b = 1; b < _th->GetNbinsX(); ++b) {
+            for (int b = 1; b <= _th->GetNbinsX(); ++b) {
                 _th->SetBinContent(b, dynamic_cast<TF1*>(obj)->Eval(_th->GetBinCenter(b)));
             }
             _th->SetDirectory(nullptr); // just to be sure
@@ -131,7 +131,7 @@ namespace utils {
         }
     }
 
-  std::vector<bkg_comp> get_components_json(json& config, std::string gerda_pdfs = "", bool discard_user_files = false) {
+    std::vector<bkg_comp> get_components_json(json& config, std::string gerda_pdfs = "", bool discard_user_files = false) {
         std::vector<bkg_comp> comp_map;
 
         // eventually get a global value for the gerda-pdfs path
@@ -205,11 +205,15 @@ namespace utils {
                         auto objname = iso.value()["hist-name"].get<std::string>();
                         auto th = utils::get_component(filename, objname, 8000, 0, 8000);
                         th->SetName((iso.key() + "_" + std::string(th->GetName())).c_str());
+
                         for (int b = 0; b <= th->GetNbinsX()+1; ++b) {
+                            logging::out(logging::warning) << "Negative bin contents detected in pdf built for "
+                                << iso.key() << ", setting them to zero" << std::endl;
                             if (th->GetBinContent(b) < 0) {
                                 th->SetBinContent(b, 0);
                             }
                         }
+
                         // comp_map now owns the histogram
                         comp_map.emplace_back(iso.key(), th.release(), iso.value()["amount-cts"].get<float>());
                     }
