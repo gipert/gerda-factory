@@ -44,6 +44,9 @@ namespace utils {
 
     // The returned raw TH1 pointer is owned by the user
     std::unique_ptr<TH1> get_component(std::string filename, std::string objectname, int nbinsx = 100, double xmin = 0, double xmax = 100) {
+
+        TH1::AddDirectory(false);
+
         TFile _tf(filename.c_str());
         if (!_tf.IsOpen()) throw std::runtime_error("invalid ROOT file: " + filename);
         auto obj = _tf.Get(objectname.c_str());
@@ -63,7 +66,6 @@ namespace utils {
             long long int nprim = (_nprim) ? _nprim->GetVal() : 1;
             _th->Scale(1./nprim);
 
-            _th->SetDirectory(nullptr);
             return _th; // expect compiler to copy-elide here
         }
         else if (obj->InheritsFrom(TF1::Class())) {
@@ -71,7 +73,6 @@ namespace utils {
             for (int b = 1; b <= _th->GetNbinsX(); ++b) {
                 _th->SetBinContent(b, dynamic_cast<TF1*>(obj)->Eval(_th->GetBinCenter(b)));
             }
-            _th->SetDirectory(nullptr); // just to be sure
             return _th; // expect compiler to copy-elide here
         }
         else {
@@ -207,9 +208,9 @@ namespace utils {
                         th->SetName((iso.key() + "_" + std::string(th->GetName())).c_str());
 
                         for (int b = 0; b <= th->GetNbinsX()+1; ++b) {
-                            logging::out(logging::warning) << "Negative bin contents detected in pdf built for "
-                                << iso.key() << ", setting them to zero" << std::endl;
                             if (th->GetBinContent(b) < 0) {
+                                logging::out(logging::warning) << "Negative bin content detected in pdf built for "
+                                    << iso.key() << "in bin " << b << ", setting it to zero" << std::endl;
                                 th->SetBinContent(b, 0);
                             }
                         }
@@ -244,8 +245,8 @@ namespace utils {
                         // check for negative bin contents
                         for (int b = 0; b <= collection[0]->GetNbinsX()+1; ++b) {
                             if (collection[0]->GetBinContent(b) < 0) {
-                                logging::out(logging::warning) << "Negative bin contents detected in pdf built for "
-                                    << iso.key() << ", setting them to zero" << std::endl;
+                                logging::out(logging::warning) << "Negative bin content detected in pdf built for "
+                                    << iso.key() << "in bin " << b << ", setting it to zero" << std::endl;
                                 collection[0]->SetBinContent(b, 0);
                             }
                         }

@@ -19,6 +19,8 @@ namespace logs = utils::logging;
 
 int main(int argc, char** argv) {
 
+    TH1::AddDirectory(false);
+
     /*
      * get command line args
      */
@@ -96,7 +98,7 @@ int main(int argc, char** argv) {
     auto outname = utils::get_file_obj(config["output"]["file"].get<std::string>());
 
     // container for output histograms
-    std::vector<TH1D*> experiments;
+    std::vector<std::unique_ptr<TH1>> experiments;
 
     auto niter = config.value("number-of-experiments", 100);
     progressbar bar(niter);
@@ -307,7 +309,8 @@ int main(int argc, char** argv) {
         // now generate the experiment
         logs::out(logs::detail) << "filling output histogram" << std::endl;
 
-        auto hexp = dynamic_cast<TH1D*>(factory.FillPseudoExp());
+        experiments.push_back(factory.FillPseudoExp());
+        auto hexp = experiments.back().get();
 
         int n_orig_bins = factory.GetModel()->GetNbinsX();
 
@@ -320,7 +323,6 @@ int main(int argc, char** argv) {
         hexp->SetName(((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str());
         hexp->SetTitle("Pseudo experiment");
 
-        experiments.push_back(hexp);
         logs::out(logs::debug) << "object " << hexp->GetName()
                                << " added to collection " << std::endl;
     }
@@ -329,7 +331,7 @@ int main(int argc, char** argv) {
     logs::out(logs::debug) << "opening output file" << std::endl;
     system(("mkdir -p " + outname.first.substr(0, outname.first.find_last_of('/'))).c_str());
     TFile fout(outname.first.c_str(), "recreate");
-    for (auto e : experiments) e->Write();
+    for (const auto& e : experiments) dynamic_cast<TH1D*>(e.get())->Write();
     fout.Close();
 
     logs::out(logs::debug) << "exiting" << std::endl;
