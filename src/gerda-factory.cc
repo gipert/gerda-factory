@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
     logs::min_level = config.value("logging", logs::info);
 
     /*
-     * create model
+     * create experiment factory
      */
 
     GerdaFastFactory factory;
@@ -80,6 +80,7 @@ int main(int argc, char** argv) {
         );
     }
 
+    // parse and build reference model
     logs::out(logs::detail) << "getting base component list from JSON config" << std::endl;
     auto comp_list = utils::get_components_json(config);
     // save it (deep copy), we'll need it after resetting the factory before the next iterations
@@ -108,11 +109,13 @@ int main(int argc, char** argv) {
     bar.set_closing_bracket_char("]");
     logs::out(logs::info) << "generating " << niter << " experiments ";
     logs::out(logs::detail) << std::endl;
+
     for (int i = 0; i < niter; ++i) {
         if (logs::min_level > logs::detail) bar.update();
-        // reset components
-        factory.ResetComponents();
+        // reset model from last iteration
+        factory.Reset();
         comp_list.clear();
+        // we restart from base model
         comp_list = utils::deep_copy(comp_list_save);
 
         bool done_something = false;
@@ -126,10 +129,20 @@ int main(int argc, char** argv) {
                     if (it.value()["interpolate"].get<bool>() == true) interpolate = true;
                 }
 
+                // Interpolation with unitary distortion
+                //
+                // Must be used with care, as it modifies the prior on the
+                // distortions from a certain group.  After a discrete (user
+                // input) distortion is selected, a random number w in [0,1] is
+                // drawn.  This number w defines the admixture of the
+                // distortion D with the unitary distortion U according to the
+                // following simple formula:
+                //
+                //     pdf' = pdf * [ w * D + (1-w) * U ]
                 if (interpolate) {
                     logs::out(logs::debug) << "randomly choosing a distortion for '" << it.key()
                                            << " and interpolating with the unitary distortion" << std::endl;
-                    // choose a discrete distortion randomly
+                    // first choose a discrete distortion randomly
                     auto choice = rndgen.Integer(it.value()["pdfs"].size());
                     logs::out(logs::detail) << "chosen random distortion: '"
                                             << it.value()["pdfs"][choice].get<std::string>()
@@ -144,7 +157,7 @@ int main(int argc, char** argv) {
                             [&itt](utils::bkg_comp& a) { return a.name == itt->name; }
                         );
 
-                        // distort with weight
+                        // then choose a distortion weight
                         if (result != comp_list.end()) {
                             auto weight = rndgen.Uniform(1);
                             logs::out(logs::debug) << "successfully found corresponding fit component '" << itt->name
@@ -232,8 +245,8 @@ int main(int argc, char** argv) {
                     if (it.value()["interpolate"].get<bool>() == true) interpolate = true;
                 }
 
+                // Interpolate with unitary distortion
                 if (interpolate) {
-
                     logs::out(logs::debug) << "randomly choosing a discrete distortion for '"
                                            << it.key() << "and interpolating with the unitary distortion" << std::endl;
                     // choose a distortion randomly
@@ -309,7 +322,7 @@ int main(int argc, char** argv) {
         // now generate the experiment
         logs::out(logs::detail) << "filling output histogram" << std::endl;
 
-        experiments.push_back(factory.FillPseudoExp());
+        experiments.push_back(factory.GetPseudoExp());
         auto hexp = experiments.back().get();
 
         int n_orig_bins = factory.GetModel()->GetNbinsX();

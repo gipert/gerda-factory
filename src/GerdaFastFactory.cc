@@ -42,7 +42,7 @@ void GerdaFastFactory::AddComponent(const TH1* hist, const float counts) {
     _model->Add(htmp.get());
 }
 
-std::unique_ptr<TH1> GerdaFastFactory::FillPseudoExp() {
+std::unique_ptr<TH1> GerdaFastFactory::GetPseudoExp() {
 
   if (!_model.get()) throw std::runtime_error("GerdaFastFactory::FillPseudoExp] must call GerdaFastFactory::AddComponent first.");
 
@@ -56,6 +56,6 @@ std::unique_ptr<TH1> GerdaFastFactory::FillPseudoExp() {
   return out;
 }
 
-void GerdaFastFactory::ResetComponents() {
+void GerdaFastFactory::Reset() {
   _model.release();
 }

@@ -46,7 +46,7 @@ The JSON config file for the `gerda-fake-gen` program begins with some general s
     "id" : "phIIAfterLAr",  // model name
     "logging" : "info",     // verbosity level, choose between {debug, detail, info, warning, error}
     "output" : {  // output settings
-        "file" : "../results/phIIAfterLAr-exp-pool.root:eventual_name",  // output filename (and ROOT object name)
+        "file" : "../results/phIIAfterLAr-exp-pool.root:object_name",  // output filename (and ROOT object name)
         "number-of-bins" : 8000,
         "xaxis-range" : [0, 8000]
     },
@@ -127,13 +127,14 @@ The syntax is the following:
                     ...
                 ],
                 "interpolate": true  // can randomly reduce the magnitude of the distortion
-                                     // by mixing it with the unitary distortion
+                                     // by mixing it with the unitary distortion. must be used
+                                     // with care, please see note below
             },
             ...
         },
         "specific" : {  // category of distortions that have to be applied to single components
             "component1"  : { "pdfs" : [ "file1.root" ] }, // the name of the component must be listed also in the
-                                              // list of model components above!
+                                                           // list of model components above!
             "component2" : {
                 "pdfs" : [
                     "file2.root:objname",  // single ROOT file with eventual object name
@@ -145,6 +146,18 @@ The syntax is the following:
         }
     }
 ```
+
+**Note:** interpolation is performed with respect to the unitary distortion. In
+practice, after randomly selecting a distortion from a certain group, an
+additional random number `w` is drawn from a uniform distribution in [0,1].
+This number is used to weight the distortion `D` together with the unitary
+distortion `U` according to the following expression:
+```
+    pdf' = pdf * [ w * D + (1-w) * U ]
+```
+As a raccommendation, use interpolation only when the test statistic
+distribution assumes unexpected shapes (i.e. peaks), otherwise keep the option
+off.
 
 ### Related project
 
