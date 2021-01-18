@@ -4,13 +4,14 @@
  * Created: Tue 18 Jun 2019
  *
  */
+#ifndef _GERDA_FAST_FACTORY_H
+#define _GERDA_FAST_FACTORY_H
+
 #include <vector>
+#include <memory>
 
 #include "TH1.h"
 #include "TRandom3.h"
-
-#ifndef _GERDA_FAST_FACTORY_H
-#define _GERDA_FAST_FACTORY_H
 
 class GerdaFastFactory {
 
@@ -22,20 +23,20 @@ class GerdaFastFactory {
 
     // custom constructor
     GerdaFastFactory();
-    ~GerdaFastFactory();
+    ~GerdaFastFactory() = default;
 
-    inline TH1* GetModel() const { return _model; }
+    inline TH1* GetModel() const { return _model.get(); }
 
     void SetCountsRange(float xmin, float xmax);
     void AddComponent(const TH1* hist, const float counts);
     void AddComponent(const std::unique_ptr<TH1>& hist, const float counts);
-    TH1* FillPseudoExp();
+    std::unique_ptr<TH1> FillPseudoExp();
     void ResetComponents();
 
     private:
 
     TRandom3 _rndgen;
-    TH1* _model;
+    std::unique_ptr<TH1> _model;
     std::pair<float, float> _range;
 };
 

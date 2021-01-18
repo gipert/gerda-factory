@@ -11,10 +11,8 @@
 GerdaFastFactory::GerdaFastFactory() :
     _rndgen(0),
     _range(0, 0) {
-}
 
-GerdaFastFactory::~GerdaFastFactory() {
-    if (_model) delete _model;
+    TH1::AddDirectory(false);
 }
 
 void GerdaFastFactory::SetCountsRange(float xmin, float xmax) {
@@ -28,27 +26,27 @@ void GerdaFastFactory::AddComponent(const TH1* hist, const float counts) {
     if (counts < 0) throw std::runtime_error("GerdaFastFactory::AddComponent] weight is < 0.");
 
     // clone
-    auto htmp = dynamic_cast<TH1*>(hist->Clone(("comp_" + std::to_string(_rndgen.Uniform(0, 1E6))).c_str()));
+    std::unique_ptr<TH1> htmp(dynamic_cast<TH1*>(hist->Clone()));
 
     // normalize to requested weight
     if (_range.first == 0 and _range.second == 0) htmp->Scale(counts/htmp->Integral());
     else htmp->Scale(counts/htmp->Integral(htmp->GetXaxis()->FindBin(_range.first), htmp->GetXaxis()->FindBin(_range.second)));
 
     // initialize total model, if needed
-    if (!_model) {
-        _model = dynamic_cast<TH1*>(hist->Clone("model"));
+    if (_model == nullptr) {
+        _model = std::unique_ptr<TH1>(dynamic_cast<TH1*>(hist->Clone("model")));
         _model->Reset();
     }
 
     // add
-    _model->Add(htmp);
+    _model->Add(htmp.get());
 }
 
-TH1* GerdaFastFactory::FillPseudoExp() {
+std::unique_ptr<TH1> GerdaFastFactory::FillPseudoExp() {
 
-  if (!_model) throw std::runtime_error("GerdaFastFactory::FillPseudoExp] must call GerdaFastFactory::AddComponent first.");
+  if (!_model.get()) throw std::runtime_error("GerdaFastFactory::FillPseudoExp] must call GerdaFastFactory::AddComponent first.");
 
-  auto out = dynamic_cast<TH1*>(_model->Clone("pseudo_exp"));
+  auto out = std::unique_ptr<TH1>(dynamic_cast<TH1*>(_model->Clone("pseudo_exp")));
   out->Reset();
 
   for (int b = 1; b <= out->GetNbinsX(); ++b) {
@@ -59,5 +57,5 @@ TH1* GerdaFastFactory::FillPseudoExp() {
 }
 
 void GerdaFastFactory::ResetComponents() {
-  _model = nullptr;
+  _model.release();
 }

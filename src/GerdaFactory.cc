@@ -10,6 +10,8 @@
 GerdaFactory::GerdaFactory() :
     _rndgen(0),
     _range(0, 0) {
+
+    TH1::AddDirectory(false);
 }
 
 void GerdaFactory::SetCountsRange(float xmin, float xmax) {
@@ -25,10 +27,7 @@ void GerdaFactory::AddComponent(const TH1* hist, const float counts) {
 
     // insert clone
     std::unique_ptr<TH1> _tmp(dynamic_cast<TH1*>(hist->Clone(("comp_" + std::to_string(_comp_list.size())).c_str())));
-    auto position = _comp_list.emplace(std::move(_tmp), counts);
-
-    // precaution, detach from any TDirectory
-    position.first->first->SetDirectory(nullptr);
+    _comp_list.emplace(std::move(_tmp), counts);
 }
 
 // creates an internal copy of the histogram pointer

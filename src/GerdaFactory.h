@@ -4,15 +4,15 @@
  * Created: Tue 18 Jun 2019
  *
  */
+#ifndef _GERDA_FACTORY_H
+#define _GERDA_FACTORY_H
+
 #include <vector>
 #include <map>
 #include <memory>
 
 #include "TH1.h"
 #include "TRandom3.h"
-
-#ifndef _GERDA_FACTORY_H
-#define _GERDA_FACTORY_H
 
 class GerdaFactory {
 
