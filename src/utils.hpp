@@ -206,6 +206,14 @@ namespace utils {
                         auto th = utils::get_component(filename, objname, 8000, 0, 8000);
                         th->SetName((iso.key() + "_" + std::string(th->GetName())).c_str());
 
+                        for (int b = 0; b <= th->GetNbinsX()+1; ++b) {
+                            logging::out(logging::warning) << "Negative bin contents detected in pdf built for "
+                                << iso.key() << ", setting them to zero" << std::endl;
+                            if (th->GetBinContent(b) < 0) {
+                                th->SetBinContent(b, 0);
+                            }
+                        }
+
                         // comp_map now owns the histogram
                         comp_map.emplace_back(iso.key(), th.release(), iso.value()["amount-cts"].get<float>());
                     }
@@ -233,8 +241,11 @@ namespace utils {
                         // now sum them all
                         for (auto it = collection.begin()+1; it != collection.end(); it++) collection[0]->Add(it->get());
 
+                        // check for negative bin contents
                         for (int b = 0; b <= collection[0]->GetNbinsX()+1; ++b) {
                             if (collection[0]->GetBinContent(b) < 0) {
+                                logging::out(logging::warning) << "Negative bin contents detected in pdf built for "
+                                    << iso.key() << ", setting them to zero" << std::endl;
                                 collection[0]->SetBinContent(b, 0);
                             }
                         }

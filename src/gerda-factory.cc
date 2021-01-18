@@ -15,6 +15,7 @@
 namespace logs = utils::logging;
 
 #include "GerdaFactory.h"
+#include "GerdaFastFactory.h"
 
 int main(int argc, char** argv) {
 
@@ -67,7 +68,7 @@ int main(int argc, char** argv) {
      * create model
      */
 
-    GerdaFactory factory;
+    GerdaFastFactory factory;
 
     // set range for counts
     if (config["range-for-counts"].is_array()) {
@@ -101,8 +102,8 @@ int main(int argc, char** argv) {
     progressbar bar(niter);
     bar.set_todo_char(" ");
     bar.set_done_char("█");
-    bar.set_opening_bracket_char("");
-    bar.set_closing_bracket_char("");
+    bar.set_opening_bracket_char("[");
+    bar.set_closing_bracket_char("]");
     logs::out(logs::info) << "generating " << niter << " experiments ";
     logs::out(logs::detail) << std::endl;
     for (int i = 0; i < niter; ++i) {
@@ -305,14 +306,19 @@ int main(int argc, char** argv) {
 
         // now generate the experiment
         logs::out(logs::detail) << "filling output histogram" << std::endl;
-        auto hexp = new TH1D(
-            ((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str(),
-            "Pseudo experiment",
-            config["output"].value("number-of-bins", 8000),
-            config["output"].value("xaxis-range", std::vector<int>{0, 8000})[0],
-            config["output"].value("xaxis-range", std::vector<int>{0, 8000})[1]
-        );
-        factory.FillPseudoExp(hexp);
+
+        auto hexp = dynamic_cast<TH1D*>(factory.FillPseudoExp());
+
+        int n_orig_bins = factory.GetModel()->GetNbinsX();
+
+        if (n_orig_bins % config["output"]["number-of-bins"].get<int>() != 0) {
+            throw std::runtime_error("\"number-of-bins\" is incompatible with reference model number of bins (" +
+                    std::to_string(n_orig_bins) + ")");
+        }
+        else hexp->Rebin(n_orig_bins / config["output"]["number-of-bins"].get<int>());
+
+        hexp->SetName(((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str());
+        hexp->SetTitle("Pseudo experiment");
 
         experiments.push_back(hexp);
         logs::out(logs::debug) << "object " << hexp->GetName()

@@ -3,6 +3,7 @@
 /data/distortions
 /data/gerda-pdfs
 /results
+/bin
 
 *.sif
 
