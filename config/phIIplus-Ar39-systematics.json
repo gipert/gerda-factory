@@ -87,29 +87,30 @@
 		    "pdf-Ar39-565keV_vs_570keV.root"
 		]
             },
-            "Bi214-Pb214" : {
-                "interpolate" : true,
+            "Pb214-Bi214" : {
+                "interpolate" : false,
                 "pdfs" : [ 
-		    "pdf-Bi214_Pb214-cables_vs_fibers.root",
-		    "pdf-Bi214_Pb214-cables_vs_minishroud.root",
-		    "pdf-Bi214_Pb214-cables_vs_holders.root"      
+		    "pdf-Pb214_Bi214-cables_vs_outer_fibers.root",
+		    "pdf-Pb214_Bi214-cables_vs_inner_fibers.root",
+		    "pdf-Pb214_Bi214-cables_vs_minishroud.root",
+		    "pdf-Pb214_Bi214-cables_vs_holders.root"      
 		]
             },
             "K40"   : {
-                "interpolate" : true,
+                "interpolate" : false,
                 "pdfs" : [
-                    "pdf-K40_close-minishroud_vs_cables.root",
-                    "pdf-K40_close-minishroud_vs_holders.root",
-                    "pdf-K40_close-minishroud_vs_inner_fibers.root",
-                    "pdf-K40_close-minishroud_vs_outer_fibers.root"
+                    "pdf-K40-minishroud_vs_cables.root",
+                    "pdf-K40-minishroud_vs_holders.root",
+                    "pdf-K40-minishroud_vs_inner_fibers.root",
+                    "pdf-K40-minishroud_vs_outer_fibers.root"
                 ]
             },
             "K42"   : {
-                "interpolate" : true,
+                "interpolate" : false,
                 "pdfs" : [
-                    "pdf-K42_close-inside_ms_vs_outside_ms.root",
-                    "pdf-K42_close-inside_ms_vs_above_array.root",
-                    "pdf-K42_close-inside_ms_vs_sur_array.root"
+                    "pdf-K42-inside_ms_vs_outside_ms.root",
+                    "pdf-K42-inside_ms_vs_above_array.root",
+                    "pdf-K42-inside_ms_vs_sur_array.root"
                 ]
             }
         }

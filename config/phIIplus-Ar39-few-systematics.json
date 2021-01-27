@@ -1,0 +1,97 @@
+{
+    "logging" : "info",
+    "output" : {
+        "file" : "../results/output_Ar39-few-systematics.root",
+        "number-of-bins" : 8000,
+        "xaxis-range" : [0, 8000]
+    },
+    "range-for-counts" : [45, 160],
+    "gerda-pdfs" : "../data/gerda-pdfs/ar39-study/tl-reference",
+    "number-of-experiments" : 100,
+    "hist-name" : "lar/M1_ch0",
+    "components" : [
+        {
+            "part": "lar/sur_array_1",
+            "components" : {
+                "Ar39" : {
+                    "isotope" :  "Ar39" ,
+                    "amount-cts" : 50147 
+                }
+            }
+        },
+        {
+            "part": "cables/cables_all",
+            "components" : {
+                "Pb214-Bi214" : {
+                    "isotope" : { "Bi214" : 1, "Pb214" : 1 },
+                    "amount-cts" : 104
+                }
+            }
+        },
+        {
+            "part": "gedet/intrinsic_bege",
+            "components" : {
+                "2nbb" : {
+                    "isotope" : "2nbb",
+                    "amount-cts" : 155
+                }
+            }
+        },
+        {
+            "part": "minishroud/ms_all",
+            "components" : {
+                "K40" : {
+                    "isotope" : "K40",
+                    "amount-cts" : 207
+                }
+            }
+        },
+        {
+            "part": "lar/inside_ms",
+            "components" : {
+                "K42" : {
+                    "isotope" : "K42",
+                    "amount-cts" : 1139
+                }
+            }
+        }
+    ],
+    "pdf-distortions" : {
+        "prefix" : "../data/distortions/Ar",
+        "specific" : {
+            "Ar39" : {
+                "interpolate" : false,
+                "pdfs" : [ 
+		    "pdf-Ar39-565keV_vs_560keV.root",
+		    "pdf-Ar39-565keV_vs_570keV.root"
+		]
+            },
+            "Pb214-Bi214" : {
+                "interpolate" : false,
+                "pdfs" : [ 
+		    "pdf-Pb214_Bi214-cables_vs_outer_fibers.root",
+		    "pdf-Pb214_Bi214-cables_vs_inner_fibers.root",
+		    "pdf-Pb214_Bi214-cables_vs_minishroud.root",
+		    "pdf-Pb214_Bi214-cables_vs_holders.root"      
+		]
+            },
+            "K40"   : {
+                "interpolate" : false,
+                "pdfs" : [
+                    "pdf-K40-minishroud_vs_cables.root",
+                    "pdf-K40-minishroud_vs_holders.root",
+                    "pdf-K40-minishroud_vs_inner_fibers.root",
+                    "pdf-K40-minishroud_vs_outer_fibers.root"
+                ]
+            },
+            "K42"   : {
+                "interpolate" : false,
+                "pdfs" : [
+                    "pdf-K42-inside_ms_vs_outside_ms.root",
+                    "pdf-K42-inside_ms_vs_above_array.root",
+                    "pdf-K42-inside_ms_vs_sur_array.root"
+                ]
+            }
+        }
+    }
+}
