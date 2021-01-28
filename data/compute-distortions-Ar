@@ -77,6 +77,78 @@ done
 
 
 
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_m05.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_m05beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_m10.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_m10beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_m20.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_m20beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_m30.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_m30beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_m40.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_m40beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_m50.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_m50beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_p05.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_p05beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_p10.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_p10beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_p20.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_p20beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_p30.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_p30beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_p40.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_p40beta.root
+
+./take_ratio.C \
+    /home/valentina/Legend/Argon/gerda-factory/data/gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39_beta/pdf-lar-sur_array_1-Ar39_p50.root \
+    gerda-pdfs/ar39-study/tl-reference/lar/sur_array_1/Ar39/pdf-lar-sur_array_1-Ar39.root \
+    raw/M1_ch0 \
+    distortions/Ar/pdf-Ar39-565keV_vs_p50beta.root
+
 
 
 ./take_ratio.C \
@@ -121,6 +193,7 @@ done
     gerda-pdfs/ar39-study/tl-reference/lar/inside_ms/K42/pdf-lar-inside_ms-K42.root\
     raw/M1_ch0 \
     distortions/Ar/pdf-K42-inside_ms_vs_sur_array.root
+
 
 ./take_ratio.C \
     gerda-pdfs/ar39-study/tl-reference/lar/sur_array/K42/pdf-lar-sur_array-K42.root\
