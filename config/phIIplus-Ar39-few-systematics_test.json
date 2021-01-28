@@ -1,7 +1,7 @@
 {
     "logging" : "info",
     "output" : {
-        "file" : "../results/output_Ar39-few-systematics_test.root",
+        "file" : "../results/output_Ar39-few-systematics_beta_test.root",
         "number-of-bins" : 8000,
         "xaxis-range" : [0, 8000]
     },
@@ -60,6 +60,23 @@
         "prefix" : "../data/distortions/Ar",
         "specific" : {
             "Ar39" : {
+                "interpolate" : false,
+                "pdfs" : [
+                    "pdf-Ar39-565keV_vs_m05beta.root",
+                    "pdf-Ar39-565keV_vs_m10beta.root",
+                    "pdf-Ar39-565keV_vs_m20beta.root",
+                    "pdf-Ar39-565keV_vs_m30beta.root",
+                    "pdf-Ar39-565keV_vs_m40beta.root",
+                    "pdf-Ar39-565keV_vs_m50beta.root",
+                    "pdf-Ar39-565keV_vs_p05beta.root",
+                    "pdf-Ar39-565keV_vs_p10beta.root",
+                    "pdf-Ar39-565keV_vs_p20beta.root",
+                    "pdf-Ar39-565keV_vs_p30beta.root",
+                    "pdf-Ar39-565keV_vs_p40beta.root",
+                    "pdf-Ar39-565keV_vs_p50beta.root"
+                ]
+            },
+   	    "Ar39" : {
                 "interpolate" : false,
                 "pdfs" : [ 
 		    "pdf-Ar39-565keV_vs_560keV.root",
