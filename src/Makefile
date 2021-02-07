@@ -14,11 +14,11 @@ all: dirs | $(EXE)
 dirs :
 	@mkdir -p bin
 
-bin/gerda-fake-gen : src/gerda-fake-gen.cc src/GerdaFactory.cc src/GerdaFactory.h src/utils.hpp
-	$(CXX) $(CXXFLAGS) -o $@ $< src/GerdaFactory.cc $(LIBS)
+bin/gerda-fake-gen : gerda-fake-gen.cc GerdaFactory.cc GerdaFactory.h utils.hpp
+	$(CXX) $(CXXFLAGS) -o $@ $< GerdaFactory.cc $(LIBS)
 
-bin/gerda-factory : src/gerda-factory.cc src/GerdaFastFactory.cc src/GerdaFastFactory.h src/utils.hpp
-	$(CXX) $(CXXFLAGS) -o $@ $< src/GerdaFastFactory.cc $(LIBS)
+bin/gerda-factory : gerda-factory.cc GerdaFastFactory.cc GerdaFastFactory.h utils.hpp
+	$(CXX) $(CXXFLAGS) -o $@ $< GerdaFastFactory.cc $(LIBS)
 
 clean :
 	-rm -f $(EXE)
