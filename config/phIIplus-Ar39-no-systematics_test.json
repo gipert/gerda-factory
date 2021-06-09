@@ -1,0 +1,68 @@
+{
+    "logging" : "info",
+    "output" : {
+        "file" : "../results/output_Ar39-no-systematics_test.root",
+        "number-of-bins" : 8000,
+        "xaxis-range" : [0, 8000]
+    },
+    "range-for-counts" : [45, 160],
+    "gerda-pdfs" : "../data/gerda-pdfs/ar39-study/tl-reference",
+    "number-of-experiments" : 100,
+    "hist-name" : "raw/M1_ch0",
+    "components" : [
+        {
+            "part": "lar/sur_array_1",
+            "components" : {
+                "Ar39" : {
+                    "isotope" :  "Ar39" ,
+                    "amount-cts" : 24803 
+                }
+            }
+        },
+        {
+            "part": "cables/cables_all",
+            "components" : {
+                "Pb214-Bi214" : {
+                    "isotope" : { "Bi214" : 1, "Pb214" : 1 },
+                    "amount-cts" : 51
+                }
+            }
+        },
+        {
+            "part": "gedet/intrinsic_bege",
+            "components" : {
+                "2nbb" : {
+                    "isotope" : "2nbb",
+                    "amount-cts" : 77
+                }
+            }
+        },
+        {
+            "part": "minishroud/ms_all",
+            "components" : {
+                "K40" : {
+                    "isotope" : "K40",
+                    "amount-cts" : 102
+                }
+            }
+        },
+        {
+            "part": "lar/inside_ms",
+            "components" : {
+                "K42" : {
+                    "isotope" : "K42",
+                    "amount-cts" : 563
+                }
+            }
+        }
+    ],
+   "pdf-distortions" : {
+        "prefix" : "../data/distortions/Ar",
+        "specific" : {
+            "K42"       : {
+                "interpolate" : false,
+                "pdfs" : [ "pdf-unitary-distortion-all.root" ]
+            }
+        }
+    }
+}
