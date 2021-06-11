@@ -96,26 +96,14 @@ int main(int argc, char** argv) {
         );
     }
 
-    // parse and build reference model
-    logs::out(logs::detail) << "getting base component list from JSON config" << std::endl;
-    auto comp_list = utils::get_components_json(config);
-    // save it (deep copy), we'll need it after resetting the factory before the next iterations
-    const auto comp_list_save = utils::deep_copy(comp_list);
-
-    if (!config["pdf-distortions"].is_object()) {
-        throw std::runtime_error("could not find 'pdf-distortions' field in the config file");
-    }
-    if (!config["pdf-distortions"]["global"].is_object() and !config["pdf-distortions"]["specific"].is_object()) {
-        throw std::runtime_error("please specify a 'global' and/or 'specific' field under 'pdf-distortions' in the config file");
-    }
-
-    auto dist_prefix = config["pdf-distortions"].value("prefix", ".") + "/";
-    TRandom3 rndgen(0);
-
     auto outname = utils::get_file_obj(config["output"]["file"].get<std::string>());
 
     // container for output histograms
     std::vector<std::unique_ptr<TH1>> experiments;
+
+    // parse and build reference model
+    logs::out(logs::detail) << "getting base component list from JSON config" << std::endl;
+    auto comp_list = utils::get_components_json(config);
 
     auto niter = config.value("number-of-experiments", 100);
     progressbar bar(niter);
@@ -126,98 +114,107 @@ int main(int argc, char** argv) {
     logs::out(logs::info) << "generating " << niter << " experiments ";
     logs::out(logs::detail) << std::endl;
 
-    for (int i = 0; i < niter; ++i) {
-        if (logs::min_level > logs::detail) bar.update();
-        // reset model from last iteration
-        factory.Reset();
-        comp_list.clear();
-        // we restart from base model
-        comp_list = utils::deep_copy(comp_list_save);
+    if (!config["pdf-distortions"].is_object()) {
 
-        bool done_something = false;
-        // for distortions given with gerda-pdfs structure
-        if (config["pdf-distortions"]["global"].is_object()) {
-            logs::out(logs::detail) << "applying 'global' distortions" << std::endl;
-            for (auto& it : config["pdf-distortions"]["global"].items()) {
+        for (int i = 0; i < niter; ++i) {
+            if (logs::min_level > logs::detail) bar.update();
 
-                bool interpolate = false;
-                if (it.value().contains("interpolate")) {
-                    if (it.value()["interpolate"].get<bool>() == true) interpolate = true;
-                }
+            // add components to the factory
+            for (auto& e : comp_list) factory.AddComponent(e.hist.get(), e.counts);
 
-                // Interpolation with unitary distortion
-                //
-                // Must be used with care, as it modifies the prior on the
-                // distortions from a certain group.  After a discrete (user
-                // input) distortion is selected, a random number w in [0,1] is
-                // drawn.  This number w defines the admixture of the
-                // distortion D with the unitary distortion U according to the
-                // following simple formula:
-                //
-                //     pdf' = pdf * [ w * D + (1-w) * U ]
-                if (interpolate) {
-                    logs::out(logs::debug) << "randomly choosing a distortion for '" << it.key()
-                                           << " and interpolating with the unitary distortion" << std::endl;
-                    // first choose a discrete distortion randomly
-                    auto choice = rndgen.Integer(it.value()["pdfs"].size());
-                    logs::out(logs::detail) << "chosen random distortion: '"
-                                            << it.value()["pdfs"][choice].get<std::string>()
-                                            << "'" << (interpolate ? " -> interpolate" : "") << std::endl;
+            // now generate the experiment
+            logs::out(logs::detail) << "filling output histogram" << std::endl;
 
-                    // get histograms
-                    auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>(), true);
-                    for (auto itt = dist_list.begin(); itt != dist_list.end(); itt++) {
-                        // see if we have a corresponding fit component
-                        auto result = std::find_if(
-                            comp_list.begin(), comp_list.end(),
-                            [&itt](utils::bkg_comp& a) { return a.name == itt->name; }
-                        );
+            experiments.push_back(factory.GetPseudoExp());
+            auto hexp = experiments.back().get();
 
-                        // then choose a distortion weight
-                        if (result != comp_list.end()) {
-                            auto weight = rndgen.Uniform(1);
-                            logs::out(logs::debug) << "successfully found corresponding fit component '" << itt->name
-                                                   << "', distorting with weight = " << weight << std::endl;
+            int n_orig_bins = factory.GetModel()->GetNbinsX();
 
-                            std::unique_ptr<TH1> result_tmp(dynamic_cast<TH1*>(result->hist->Clone()));
-                            result_tmp->Multiply(itt->hist.get());
-                            result_tmp->Scale(weight/result_tmp->Integral());
+            if (n_orig_bins % config["output"]["number-of-bins"].get<int>() != 0) {
+                throw std::runtime_error("\"number-of-bins\" is incompatible with reference model number of bins (" +
+                        std::to_string(n_orig_bins) + ")");
+            }
+            else hexp->Rebin(n_orig_bins / config["output"]["number-of-bins"].get<int>());
 
-                            result->hist->Scale((1-weight)/result->hist->Integral());
-                            result->hist->Add(result_tmp.get());
+            hexp->SetName(((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str());
+            hexp->SetTitle("Pseudo experiment");
 
-                            done_something = true;
-                        }
-                        else {
-                            logs::out(logs::warning) << "could not find component '" << it.key()
-                                << "' to distort" << std::endl;
-                        }
+            logs::out(logs::debug) << "object " << hexp->GetName()
+                                   << " added to collection " << std::endl;
+        }
+    }
+    else {
+
+        if (!config["pdf-distortions"]["global"].is_object() and !config["pdf-distortions"]["specific"].is_object()) {
+            throw std::runtime_error("please specify a 'global' and/or 'specific' field under 'pdf-distortions' in the config file");
+        }
+
+        // clone reference model (deep copy), we'll need it after resetting the factory before the next iterations
+        const auto comp_list_save = utils::deep_copy(comp_list);
+
+        auto dist_prefix = config["pdf-distortions"].value("prefix", ".") + "/";
+        TRandom3 rndgen(0);
+
+        for (int i = 0; i < niter; ++i) {
+            if (logs::min_level > logs::detail) bar.update();
+            // reset model from last iteration
+            factory.Reset();
+            comp_list.clear();
+            // we restart from base model
+            comp_list = utils::deep_copy(comp_list_save);
+
+            bool done_something = false;
+            // for distortions given with gerda-pdfs structure
+            if (config["pdf-distortions"]["global"].is_object()) {
+                logs::out(logs::detail) << "applying 'global' distortions" << std::endl;
+                for (auto& it : config["pdf-distortions"]["global"].items()) {
+
+                    bool interpolate = false;
+                    if (it.value().contains("interpolate")) {
+                        if (it.value()["interpolate"].get<bool>() == true) interpolate = true;
                     }
-                }
-                else {
-                    logs::out(logs::debug) << "randomly choosing a discrete distortion for '" << it.key() << std::endl;
-                    // choose a distortion randomly
-                    // the +1 corresponds to no distortion applied
-                    auto choice = rndgen.Integer(it.value()["pdfs"].size()+1);
-                    if (choice != it.value()["pdfs"].size()) {
+
+                    // Interpolation with unitary distortion
+                    //
+                    // Must be used with care, as it modifies the prior on the
+                    // distortions from a certain group.  After a discrete (user
+                    // input) distortion is selected, a random number w in [0,1] is
+                    // drawn.  This number w defines the admixture of the
+                    // distortion D with the unitary distortion U according to the
+                    // following simple formula:
+                    //
+                    //     pdf' = pdf * [ w * D + (1-w) * U ]
+                    if (interpolate) {
+                        logs::out(logs::debug) << "randomly choosing a distortion for '" << it.key()
+                                               << " and interpolating with the unitary distortion" << std::endl;
+                        // first choose a discrete distortion randomly
+                        auto choice = rndgen.Integer(it.value()["pdfs"].size());
                         logs::out(logs::detail) << "chosen random distortion: '"
                                                 << it.value()["pdfs"][choice].get<std::string>()
-                                                << "'" << std::endl;
+                                                << "'" << (interpolate ? " -> interpolate" : "") << std::endl;
 
                         // get histograms
                         auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>(), true);
                         for (auto itt = dist_list.begin(); itt != dist_list.end(); itt++) {
                             // see if we have a corresponding fit component
                             auto result = std::find_if(
-                                    comp_list.begin(), comp_list.end(),
-                                    [&itt](utils::bkg_comp& a) { return a.name == itt->name; }
-                                    );
+                                comp_list.begin(), comp_list.end(),
+                                [&itt](utils::bkg_comp& a) { return a.name == itt->name; }
+                            );
 
-                            // distort
+                            // then choose a distortion weight
                             if (result != comp_list.end()) {
+                                auto weight = rndgen.Uniform(1);
                                 logs::out(logs::debug) << "successfully found corresponding fit component '" << itt->name
-                                    << "', distorting" << std::endl;
-                                result->hist->Multiply(itt->hist.get());
+                                                       << "', distorting with weight = " << weight << std::endl;
+
+                                std::unique_ptr<TH1> result_tmp(dynamic_cast<TH1*>(result->hist->Clone()));
+                                result_tmp->Multiply(itt->hist.get());
+                                result_tmp->Scale(weight/result_tmp->Integral());
+
+                                result->hist->Scale((1-weight)/result->hist->Integral());
+                                result->hist->Add(result_tmp.get());
+
                                 done_something = true;
                             }
                             else {
@@ -226,134 +223,167 @@ int main(int argc, char** argv) {
                             }
                         }
                     }
-                    // no distortion applied
                     else {
-                        logs::out(logs::detail) << "chosen random distortion: "
-                                                << "stay with current PDF" << std::endl;
-                        done_something = true;
-                    }
-                }
-            }
-        }
-        // for distortions given for single components
-        if (config["pdf-distortions"]["specific"].is_object()) {
-            logs::out(logs::detail) << "applying 'specific' distortions" << std::endl;
-            for (auto& it : config["pdf-distortions"]["specific"].items()) {
-
-                // see if we have a corresponding fit component
-                auto result = std::find_if(
-                    comp_list.begin(), comp_list.end(),
-                    [&it](utils::bkg_comp& a) { return a.name == it.key(); }
-                );
-
-                if (result == comp_list.end()) {
-                    logs::out(logs::warning) << "could not find component '" << it.key()
-                                             << "' to distort" << std::endl;
-                    continue;
-                }
-                else {
-                    logs::out(logs::debug) << "successfully found corresponding fit component '" << it.key()
-                                           << "'" << std::endl;
-                }
-
-                bool interpolate = false;
-                if (it.value().contains("interpolate")) {
-                    if (it.value()["interpolate"].get<bool>() == true) interpolate = true;
-                }
-
-                // Interpolate with unitary distortion
-                if (interpolate) {
-                    logs::out(logs::debug) << "randomly choosing a discrete distortion for '"
-                                           << it.key() << "and interpolating with the unitary distortion" << std::endl;
-                    // choose a distortion randomly
-                    auto choice = rndgen.Integer(it.value()["pdfs"].size());
-
-                    if (it.value()["pdfs"][choice].is_string()) {
-                        logs::out(logs::detail) << "chosen random distortion: '"
-                                                << it.value()["pdfs"][choice].get<std::string>()
-                                                << "'" << (interpolate ? " -> interpolate" : "") << std::endl;
-
-                        auto hdist = utils::get_component(
-                            dist_prefix + it.value()["pdfs"][choice].get<std::string>(),
-                            config["hist-name"].get<std::string>(),
-                            8000, 0, 8000
-                        );
-
-                        auto weight = rndgen.Uniform(1);
-                        logs::out(logs::debug) << "distorting with weight = " << weight << std::endl;
-
-                        std::unique_ptr<TH1> result_tmp(dynamic_cast<TH1*>(result->hist->Clone()));
-                        result_tmp->Multiply(hdist.get());
-                        result_tmp->Scale(weight/result_tmp->Integral());
-
-                        result->hist->Scale((1-weight)/result->hist->Integral());
-                        result->hist->Add(result_tmp.get());
-
-                        done_something = true;
-                    }
-                    else {
-                        throw std::runtime_error("elements in arrays of distortions must be strings");
-                    }
-                }
-                else {
-
-                    logs::out(logs::debug) << "randomly choosing a discrete distortion for '"
-                                           << it.key() << std::endl;
-                    // choose a distortion randomly
-                    // the +1 corresponds to no distortion applied
-                    auto choice = rndgen.Integer(it.value()["pdfs"].size()+1);
-
-                    if (choice != it.value()["pdfs"].size()) {
-                        if (it.value()["pdfs"][choice].is_string()) {
+                        logs::out(logs::debug) << "randomly choosing a discrete distortion for '" << it.key() << std::endl;
+                        // choose a distortion randomly
+                        // the +1 corresponds to no distortion applied
+                        auto choice = rndgen.Integer(it.value()["pdfs"].size()+1);
+                        if (choice != it.value()["pdfs"].size()) {
                             logs::out(logs::detail) << "chosen random distortion: '"
                                                     << it.value()["pdfs"][choice].get<std::string>()
                                                     << "'" << std::endl;
+
+                            // get histograms
+                            auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>(), true);
+                            for (auto itt = dist_list.begin(); itt != dist_list.end(); itt++) {
+                                // see if we have a corresponding fit component
+                                auto result = std::find_if(
+                                        comp_list.begin(), comp_list.end(),
+                                        [&itt](utils::bkg_comp& a) { return a.name == itt->name; }
+                                        );
+
+                                // distort
+                                if (result != comp_list.end()) {
+                                    logs::out(logs::debug) << "successfully found corresponding fit component '" << itt->name
+                                        << "', distorting" << std::endl;
+                                    result->hist->Multiply(itt->hist.get());
+                                    done_something = true;
+                                }
+                                else {
+                                    logs::out(logs::warning) << "could not find component '" << it.key()
+                                        << "' to distort" << std::endl;
+                                }
+                            }
+                        }
+                        // no distortion applied
+                        else {
+                            logs::out(logs::detail) << "chosen random distortion: "
+                                                    << "stay with current PDF" << std::endl;
+                            done_something = true;
+                        }
+                    }
+                }
+            }
+            // for distortions given for single components
+            if (config["pdf-distortions"]["specific"].is_object()) {
+                logs::out(logs::detail) << "applying 'specific' distortions" << std::endl;
+                for (auto& it : config["pdf-distortions"]["specific"].items()) {
+
+                    // see if we have a corresponding fit component
+                    auto result = std::find_if(
+                        comp_list.begin(), comp_list.end(),
+                        [&it](utils::bkg_comp& a) { return a.name == it.key(); }
+                    );
+
+                    if (result == comp_list.end()) {
+                        logs::out(logs::warning) << "could not find component '" << it.key()
+                                                 << "' to distort" << std::endl;
+                        continue;
+                    }
+                    else {
+                        logs::out(logs::debug) << "successfully found corresponding fit component '" << it.key()
+                                               << "'" << std::endl;
+                    }
+
+                    bool interpolate = false;
+                    if (it.value().contains("interpolate")) {
+                        if (it.value()["interpolate"].get<bool>() == true) interpolate = true;
+                    }
+
+                    // Interpolate with unitary distortion
+                    if (interpolate) {
+                        logs::out(logs::debug) << "randomly choosing a discrete distortion for '"
+                                               << it.key() << "and interpolating with the unitary distortion" << std::endl;
+                        // choose a distortion randomly
+                        auto choice = rndgen.Integer(it.value()["pdfs"].size());
+
+                        if (it.value()["pdfs"][choice].is_string()) {
+                            logs::out(logs::detail) << "chosen random distortion: '"
+                                                    << it.value()["pdfs"][choice].get<std::string>()
+                                                    << "'" << (interpolate ? " -> interpolate" : "") << std::endl;
+
                             auto hdist = utils::get_component(
                                 dist_prefix + it.value()["pdfs"][choice].get<std::string>(),
                                 config["hist-name"].get<std::string>(),
                                 8000, 0, 8000
                             );
-                            logs::out(logs::debug) << "distorting" << std::endl;
-                            result->hist->Multiply(hdist.get());
+
+                            auto weight = rndgen.Uniform(1);
+                            logs::out(logs::debug) << "distorting with weight = " << weight << std::endl;
+
+                            std::unique_ptr<TH1> result_tmp(dynamic_cast<TH1*>(result->hist->Clone()));
+                            result_tmp->Multiply(hdist.get());
+                            result_tmp->Scale(weight/result_tmp->Integral());
+
+                            result->hist->Scale((1-weight)/result->hist->Integral());
+                            result->hist->Add(result_tmp.get());
+
                             done_something = true;
                         }
                         else {
                             throw std::runtime_error("elements in arrays of distortions must be strings");
                         }
                     }
-                    // no distortion applied
                     else {
-                        logs::out(logs::detail) << "chosen random distortion: "
-                                                << "stay with current PDF" << std::endl;
-                        done_something = true;
+
+                        logs::out(logs::debug) << "randomly choosing a discrete distortion for '"
+                                               << it.key() << std::endl;
+                        // choose a distortion randomly
+                        // the +1 corresponds to no distortion applied
+                        auto choice = rndgen.Integer(it.value()["pdfs"].size()+1);
+
+                        if (choice != it.value()["pdfs"].size()) {
+                            if (it.value()["pdfs"][choice].is_string()) {
+                                logs::out(logs::detail) << "chosen random distortion: '"
+                                                        << it.value()["pdfs"][choice].get<std::string>()
+                                                        << "'" << std::endl;
+                                auto hdist = utils::get_component(
+                                    dist_prefix + it.value()["pdfs"][choice].get<std::string>(),
+                                    config["hist-name"].get<std::string>(),
+                                    8000, 0, 8000
+                                );
+                                logs::out(logs::debug) << "distorting" << std::endl;
+                                result->hist->Multiply(hdist.get());
+                                done_something = true;
+                            }
+                            else {
+                                throw std::runtime_error("elements in arrays of distortions must be strings");
+                            }
+                        }
+                        // no distortion applied
+                        else {
+                            logs::out(logs::detail) << "chosen random distortion: "
+                                                    << "stay with current PDF" << std::endl;
+                            done_something = true;
+                        }
                     }
                 }
             }
+            if (!done_something) logs::out(logs::warning) << "did not distort anything!" << std::endl;
+
+            // add components to the factory
+            for (auto& e : comp_list) factory.AddComponent(e.hist.get(), e.counts);
+
+            // now generate the experiment
+            logs::out(logs::detail) << "filling output histogram" << std::endl;
+
+            experiments.push_back(factory.GetPseudoExp());
+            auto hexp = experiments.back().get();
+
+            int n_orig_bins = factory.GetModel()->GetNbinsX();
+
+            if (n_orig_bins % config["output"]["number-of-bins"].get<int>() != 0) {
+                throw std::runtime_error("\"number-of-bins\" is incompatible with reference model number of bins (" +
+                        std::to_string(n_orig_bins) + ")");
+            }
+            else hexp->Rebin(n_orig_bins / config["output"]["number-of-bins"].get<int>());
+
+            hexp->SetName(((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str());
+            hexp->SetTitle("Pseudo experiment");
+
+            logs::out(logs::debug) << "object " << hexp->GetName()
+                                   << " added to collection " << std::endl;
         }
-        if (!done_something) logs::out(logs::warning) << "did not distort anything!" << std::endl;
-
-        // add components to the factory
-        for (auto& e : comp_list) factory.AddComponent(e.hist.get(), e.counts);
-
-        // now generate the experiment
-        logs::out(logs::detail) << "filling output histogram" << std::endl;
-
-        experiments.push_back(factory.GetPseudoExp());
-        auto hexp = experiments.back().get();
-
-        int n_orig_bins = factory.GetModel()->GetNbinsX();
-
-        if (n_orig_bins % config["output"]["number-of-bins"].get<int>() != 0) {
-            throw std::runtime_error("\"number-of-bins\" is incompatible with reference model number of bins (" +
-                    std::to_string(n_orig_bins) + ")");
-        }
-        else hexp->Rebin(n_orig_bins / config["output"]["number-of-bins"].get<int>());
-
-        hexp->SetName(((outname.second != "" ? outname.second : "h") + "_" + std::to_string(i)).c_str());
-        hexp->SetTitle("Pseudo experiment");
-
-        logs::out(logs::debug) << "object " << hexp->GetName()
-                               << " added to collection " << std::endl;
     }
 
     // output file

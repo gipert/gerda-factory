@@ -7,7 +7,7 @@
     },
     "range-for-counts" : [560, 2000],
     "gerda-pdfs" : "../data/gerda-pdfs/gerda-pdfs-2nufit-best",
-    "number-of-experiments" : 100,
+    "number-of-experiments" : 100000,
     "hist-name" : "lar/M1_enrBEGe",
     "components" : [
         {
@@ -81,14 +81,5 @@
                 }
             }
         }
-    ],
-    "pdf-distortions" : {
-        "prefix" : "../data/distortions",
-        "specific" : {
-            "Co60"       : {
-                "interpolate" : false,
-                "pdfs" : [ "pdf-unitary-distortion-all.root" ]
-            }
-        }
-    }
+    ]
 }
