@@ -148,6 +148,11 @@ namespace utils {
         }
     }
 
+    /* Given a JSON configuration, and optionally a path to GERDA pdfs release,
+     * return a list of pdfs for each configured "component". set
+     * discard_user_files to true to forcibly ignore components defined by
+     * "user" (i.e. not part of the GERDa pdfs release) files.
+     */
     std::vector<bkg_comp> get_components_json(json& config, std::string gerda_pdfs = "", bool discard_user_files = false) {
         std::vector<bkg_comp> comp_map;
 
@@ -233,6 +238,9 @@ namespace utils {
 
                         // comp_map now owns the histogram
                         comp_map.emplace_back(iso.key(), th.release(), iso.value()["amount-cts"].get<float>());
+                    }
+                    else {
+                        logging::out(logging::debug) << "discard_user_files is set to true, discarding entry" << std::endl;
                     }
                 }
                 else { // look into gerda-pdfs database

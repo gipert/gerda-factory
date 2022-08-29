@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
                 //     pdf' = pdf * [ w * D + (1-w) * U ]
                 if (interpolate) {
                     logs::out(logs::debug) << "randomly choosing a distortion for '" << it.key()
-                                           << " and interpolating with the unitary distortion" << std::endl;
+                                           << "' and interpolating with the unitary distortion" << std::endl;
                     // first choose a discrete distortion randomly
                     auto choice = rndgen.Integer(it.value()["pdfs"].size());
                     logs::out(logs::detail) << "chosen random distortion: '"
@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
                                             << "'" << (interpolate ? " -> interpolate" : "") << std::endl;
 
                     // get histograms
-                    auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>(), true);
+                    auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>());
                     for (auto itt = dist_list.begin(); itt != dist_list.end(); itt++) {
                         // see if we have a corresponding fit component
                         auto result = std::find_if(
@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
                     }
                 }
                 else {
-                    logs::out(logs::debug) << "randomly choosing a discrete distortion for '" << it.key() << std::endl;
+                    logs::out(logs::debug) << "randomly choosing a discrete distortion for '" << it.key() << "'" << std::endl;
                     // choose a distortion randomly
                     // the +1 corresponds to no distortion applied
                     auto choice = rndgen.Integer(it.value()["pdfs"].size()+1);
@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
                                                 << "'" << std::endl;
 
                         // get histograms
-                        auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>(), true);
+                        auto dist_list = utils::get_components_json(config, dist_prefix + it.value()["pdfs"][choice].get<std::string>());
                         for (auto itt = dist_list.begin(); itt != dist_list.end(); itt++) {
                             // see if we have a corresponding fit component
                             auto result = std::find_if(
