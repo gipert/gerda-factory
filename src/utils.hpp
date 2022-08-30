@@ -35,7 +35,51 @@ using json = nlohmann::json;
 #ifndef UTILS_HH
 #define UTILS_HH
 
+#define logging_out(loglevel) \
+    logging::out(loglevel, "[" + std::string(__PRETTY_FUNCTION__) + \
+                 " // " + std::string(__FILE__) + ":" + std::to_string(__LINE__) + "]")
+
 namespace utils {
+
+    namespace logging {
+
+        enum level {debug, detail, info, warning, error};
+        level min_level = info;
+        std::ofstream devnull("/dev/null");
+
+        NLOHMANN_JSON_SERIALIZE_ENUM(utils::logging::level, {
+            {utils::logging::debug,   "debug"},
+            {utils::logging::detail,  "detail"},
+            {utils::logging::info,    "info"},
+            {utils::logging::warning, "warning"},
+            {utils::logging::error,   "error"},
+        })
+
+        std::ostream& out(const level& lvl, std::string prefix = "") {
+
+            if (lvl == debug and min_level <= debug) {
+                std::cout << "\033[36m[ Debug: " << prefix << "\033[0m ";
+                return std::cout;
+            }
+            if (lvl == detail and min_level <= detail) {
+                std::cout << "\033[34m[ Detail: " << prefix << "\033[0m ";
+                return std::cout;
+            }
+            if (lvl == info and min_level <= info) {
+                std::cout << "\033[97;1m[ Info: " << prefix << "\033[0m ";
+                return std::cout;
+            }
+            if (lvl == warning and min_level <= warning) {
+                std::cerr << "\033[33m[ Warning: " << prefix << "\033[0m ";
+                return std::cerr;
+            }
+            if (lvl == error and min_level <= error) {
+                std::cerr << "\033[91m[ Error: " << prefix << "\033[0m ";
+                return std::cerr;
+            }
+            else return devnull;
+        }
+    }
 
     struct bkg_comp {
         std::string name;
@@ -61,6 +105,8 @@ namespace utils {
     // The returned raw TH1 pointer is owned by the user
     std::unique_ptr<TH1> get_component(std::string filename, std::string objectname, int nbinsx = 100, double xmin = 0, double xmax = 100) {
 
+        logging_out(logging::debug) << "getting histogram '" << objectname << "' from file "
+                                     << filename << std::endl;
         TH1::AddDirectory(false);
 
         TFile _tf(filename.c_str());
@@ -80,6 +126,9 @@ namespace utils {
                 _nprim = dynamic_cast<TParameter<Long64_t>*>(_tf.Get("NumberOfPrimariesCoin"));
             }
             long long int nprim = (_nprim) ? _nprim->GetVal() : 1;
+            if (nprim != 1) {
+                logging_out(logging::debug) << "...and scaling it by 1/" << nprim << std::endl;
+            }
             _th->Scale(1./nprim);
 
             return _th; // expect compiler to copy-elide here
@@ -108,46 +157,6 @@ namespace utils {
         return std::pair<std::string, std::string>(filename, objname);
     }
 
-    namespace logging {
-
-        enum level {debug, detail, info, warning, error};
-        level min_level = info;
-        std::ofstream devnull("/dev/null");
-
-        NLOHMANN_JSON_SERIALIZE_ENUM(utils::logging::level, {
-            {utils::logging::debug,   "debug"},
-            {utils::logging::detail,  "detail"},
-            {utils::logging::info,    "info"},
-            {utils::logging::warning, "warning"},
-            {utils::logging::error,   "error"},
-        })
-
-        std::ostream& out(const level& lvl) {
-
-            if (lvl == debug and min_level <= debug) {
-                std::cout << "\033[36m[ Debug:\033[0m ";
-                return std::cout;
-            }
-            if (lvl == detail and min_level <= detail) {
-                std::cout << "\033[34m[ Detail:\033[0m ";
-                return std::cout;
-            }
-            if (lvl == info and min_level <= info) {
-                std::cout << "\033[97;1m[ Info:\033[0m ";
-                return std::cout;
-            }
-            if (lvl == warning and min_level <= warning) {
-                std::cerr << "\033[33m[ Warning:\033[0m ";
-                return std::cerr;
-            }
-            if (lvl == error and min_level <= error) {
-                std::cerr << "\033[91m[ Error:\033[0m ";
-                return std::cerr;
-            }
-            else return devnull;
-        }
-    }
-
     /* Given a JSON configuration, and optionally a path to GERDA pdfs release,
      * return a list of pdfs for each configured "component". set
      * discard_user_files to true to forcibly ignore components defined by
@@ -163,16 +172,25 @@ namespace utils {
 
         // loop over first level of "components"
         for (auto& it : config["components"]) {
+
             /* START INTERMEZZO */
             // utility to sum over the requested parts (with weight) given isotope
-            auto sum_parts = [&](std::string i) {
+            auto sum_parts = [&it, &hist_name, &gerda_pdfs](std::string i, std::string hist_name_override = "") {
                 std::string true_iso = i;
                 if (i.find('-') != std::string::npos) true_iso = i.substr(0, i.find('-'));
 
                 std::vector<std::unique_ptr<TH1>> collection;
-                if (it["part"].is_object()) {
-                    hist_name = it.value("hist-name", hist_name);
 
+                hist_name = it.value("hist-name", hist_name);
+                // the user can override the internal hist_name (if for
+                // example set in the second-level "components"
+                if (!hist_name_override.empty()) {
+                    hist_name = hist_name_override;
+                    logging_out(logging::debug) << "received request for overriding hist_name to: "
+                                                << hist_name_override << std::endl;
+                }
+
+                if (it["part"].is_object()) {
                     // compute sum of weights
                     double sumw = 0;
                     for (auto& p : it["part"].items()) sumw += p.value().get<double>();
@@ -186,8 +204,8 @@ namespace utils {
                         auto volume = path_to_part.substr(path_to_part.find_last_of('/')+1);
                         auto filename = gerda_pdfs + "/" + p.key() + "/" + true_iso + "/" + "pdf-"
                             + volume + "-" + part + "-" + i + ".root";
-                        logging::out(logging::debug) << "opening file " << filename << std::endl;
-                        logging::out(logging::debug) << "summing object '" << hist_name << " with weight "
+                        logging_out(logging::debug) << "opening file " << filename << std::endl;
+                        logging_out(logging::debug) << "summing object '" << hist_name << " with weight "
                                                      << p.value().get<double>()/sumw << std::endl;
                         // get histogram (owned by us)
                         collection.emplace_back(utils::get_component(filename, hist_name, 8000, 0, 8000));
@@ -207,7 +225,6 @@ namespace utils {
                     auto volume = path_to_part.substr(path_to_part.find_last_of('/')+1);
                     auto filename = gerda_pdfs + "/" + it["part"].get<std::string>() + "/" + true_iso + "/" + "pdf-"
                         + volume + "-" + part + "-" + i + ".root";
-                    logging::out(logging::debug) << "getting object '" << hist_name << "' in file " << filename << std::endl;
                     // get histogram (owned by us)
                     auto thh = utils::get_component(filename, hist_name, 8000, 0, 8000);
                     return thh;
@@ -218,7 +235,7 @@ namespace utils {
 
             // loop over the second level of components
             for (auto& iso : it["components"].items()) {
-                logging::out(logging::debug) << "building PDF for entry " << iso.key() << std::endl;
+                logging_out(logging::debug) << "building PDF for entry " << iso.key() << std::endl;
 
                 // it's a user defined file
                 if (it.contains("root-file")) {
@@ -230,8 +247,9 @@ namespace utils {
 
                         for (int b = 0; b <= th->GetNbinsX()+1; ++b) {
                             if (th->GetBinContent(b) < 0) {
-                                logging::out(logging::warning) << "Negative bin content detected in pdf built for "
-                                    << iso.key() << "in bin " << b << ", setting it to zero" << std::endl;
+                                logging_out(logging::warning) << "Negative bin content detected in pdf built for "
+                                                              << iso.key() << "in bin " << b
+                                                              << ", setting it to zero" << std::endl;
                                 th->SetBinContent(b, 0);
                             }
                         }
@@ -240,14 +258,21 @@ namespace utils {
                         comp_map.emplace_back(iso.key(), th.release(), iso.value()["amount-cts"].get<float>());
                     }
                     else {
-                        logging::out(logging::debug) << "discard_user_files is set to true, discarding entry" << std::endl;
+                        logging_out(logging::debug) << "discard_user_files is set to true, discarding user-defined entry" << std::endl;
                     }
                 }
                 else { // look into gerda-pdfs database
+                    auto hist_name_override = iso.value().value("hist-name", "");
+                    if (!hist_name_override.empty()) {
+                        logging_out(logging::debug) << "custom hist-name detected in '" << iso.key()
+                                                    << "' entry: '" << hist_name_override
+                                                    << "'" << std::endl;
+                    }
+
                     if (iso.value()["isotope"].is_string()) {
                         comp_map.emplace_back(
                             iso.key(),
-                            sum_parts(iso.value()["isotope"]).release(),
+                            sum_parts(iso.value()["isotope"], hist_name_override).release(),
                             iso.value()["amount-cts"].get<float>()
                         );
                     }
@@ -257,10 +282,10 @@ namespace utils {
                         for (auto& i : iso.value()["isotope"].items()) sumwi += i.value().get<double>();
 
                         for (auto& i : iso.value()["isotope"].items()) {
-                            logging::out(logging::debug) << "scaling pdf for " << i.key() << " by a factor "
+                            logging_out(logging::debug) << "scaling pdf for " << i.key() << " by a factor "
                                                          << i.value().get<double>()/sumwi << std::endl;
 
-                            collection.emplace_back(sum_parts(i.key()));
+                            collection.emplace_back(sum_parts(i.key(), hist_name_override));
                             collection.back()->Scale(i.value().get<double>()/sumwi);
                         }
                         // now sum them all
@@ -269,7 +294,7 @@ namespace utils {
                         // check for negative bin contents
                         for (int b = 0; b <= collection[0]->GetNbinsX()+1; ++b) {
                             if (collection[0]->GetBinContent(b) < 0) {
-                                logging::out(logging::warning) << "Negative bin content detected in pdf built for "
+                                logging_out(logging::warning) << "Negative bin content detected in pdf built for "
                                     << iso.key() << "in bin " << b << ", setting it to zero" << std::endl;
                                 collection[0]->SetBinContent(b, 0);
                             }
@@ -283,8 +308,11 @@ namespace utils {
                     comp_map.back().hist->SetName(
                         (iso.key() + "_" + std::string(comp_map.back().hist->GetName())).c_str()
                     );
-
                 }
+                logging_out(logging::debug) << "inserted '" << comp_map.back().name
+                                             << "' with histogram '" << comp_map.back().hist->GetName()
+                                             << "' and number of counts = " << comp_map.back().counts
+                                             << std::endl;
             }
         }
         return comp_map;
