@@ -84,15 +84,17 @@ namespace utils {
     struct bkg_comp {
         std::string name;
         std::unique_ptr<TH1> hist;
+        std::string orig_name;
         float counts;
 
         // constructor
-        bkg_comp(const std::string& n, TH1* h, float c) :
-            name(n), hist(h), counts(c) {}
+        bkg_comp(const std::string& n, TH1* h, std::string& on, float c) :
+            name(n), hist(h), orig_name(on), counts(c) {}
         // (deep) copy constructor
         bkg_comp(const bkg_comp& orig) :
             name(orig.name),
             hist(dynamic_cast<TH1*>(orig.hist->Clone())),
+            orig_name(orig.orig_name),
             counts(orig.counts) {}
     };
 
@@ -255,7 +257,7 @@ namespace utils {
                         }
 
                         // comp_map now owns the histogram
-                        comp_map.emplace_back(iso.key(), th.release(), iso.value()["amount-cts"].get<float>());
+                        comp_map.emplace_back(iso.key(), th.release(), objname, iso.value()["amount-cts"].get<float>());
                     }
                     else {
                         logging_out(logging::debug) << "discard_user_files is set to true, discarding user-defined entry" << std::endl;
@@ -273,6 +275,7 @@ namespace utils {
                         comp_map.emplace_back(
                             iso.key(),
                             sum_parts(iso.value()["isotope"], hist_name_override).release(),
+                            hist_name_override,
                             iso.value()["amount-cts"].get<float>()
                         );
                     }
@@ -300,7 +303,7 @@ namespace utils {
                             }
                         }
 
-                        comp_map.emplace_back(iso.key(), collection[0].release(), iso.value()["amount-cts"].get<float>());
+                        comp_map.emplace_back(iso.key(), collection[0].release(), hist_name_override, iso.value()["amount-cts"].get<float>());
                     }
                     else throw std::runtime_error("unexpected entry " + iso.value()["isotope"].dump()
                             + "found in [\"components\"][\"" + iso.key() + "\"][\"isotope\"]");

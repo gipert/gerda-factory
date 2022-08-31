@@ -267,21 +267,29 @@ int main(int argc, char** argv) {
                     if (it.value()["interpolate"].get<bool>() == true) interpolate = true;
                 }
 
+                // which hist-name to use?
+                std::string hist_name = it.value().value("hist-name", (*result).orig_name);
+
+                if (hist_name.empty()) {
+                    throw std::runtime_error("I have no clue which histogram to read for '"
+                            + it.key() + "'specific distortions!");
+                }
+
                 // Interpolate with unitary distortion
                 if (interpolate) {
                     logging_out(logging::debug) << "randomly choosing a discrete distortion for '"
-                                                 << it.key() << "and interpolating with the unitary distortion" << std::endl;
+                                                << it.key() << "and interpolating with the unitary distortion" << std::endl;
                     // choose a distortion randomly
                     auto choice = rndgen.Integer(it.value()["pdfs"].size());
 
                     if (it.value()["pdfs"][choice].is_string()) {
                         logging_out(logging::detail) << "chosen random distortion: '"
-                                                      << it.value()["pdfs"][choice].get<std::string>()
-                                                      << "'" << (interpolate ? " -> interpolate" : "") << std::endl;
+                                                     << it.value()["pdfs"][choice].get<std::string>()
+                                                     << "'" << (interpolate ? " -> interpolate" : "") << std::endl;
 
                         auto hdist = utils::get_component(
                             dist_prefix + it.value()["pdfs"][choice].get<std::string>(),
-                            config["hist-name"].get<std::string>(),
+                            hist_name,
                             8000, 0, 8000
                         );
 
@@ -316,7 +324,7 @@ int main(int argc, char** argv) {
                                                           << "'" << std::endl;
                             auto hdist = utils::get_component(
                                 dist_prefix + it.value()["pdfs"][choice].get<std::string>(),
-                                config["hist-name"].get<std::string>(),
+                                hist_name,
                                 8000, 0, 8000
                             );
                             logging_out(logging::debug) << "distorting" << std::endl;
